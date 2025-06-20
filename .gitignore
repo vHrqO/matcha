@@ -1,0 +1,5 @@
+# generated .g.dart files
+*.g.dart
+
+# 
+tmp/
