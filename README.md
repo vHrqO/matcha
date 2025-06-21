@@ -1,4 +1,4 @@
-# matcha
+# matcha (🚧WIP)
 
 A Flutter-powered **Tab Manager** and **Bookmark Manager** for organizing your browsing sessions with ease.
 
@@ -12,7 +12,7 @@ A Flutter-powered **Tab Manager** and **Bookmark Manager** for organizing your b
 - UI built with Flutter  
 
 
-## 🚧 In Development
+## 🔨 In Development
 
 - 🔄 Cloud sync  
 - 🏠 Self-hosted support  
