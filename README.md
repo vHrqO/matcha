@@ -1,6 +1,6 @@
 # matcha (🚧WIP)
 
-A Flutter-powered **Tab Manager** and **Bookmark Manager** for organizing your browsing sessions with ease.
+A browser extension built with Flutter to simplify tab and bookmark management.
 
 ![UI Screenshot](https://github.com/user-attachments/assets/1a8db2ce-d2f5-447c-a37a-291049546ebf)
 
