@@ -48,6 +48,10 @@ dependencies:
   skeletonizer: ^2.0.1
   flutter_animate: ^4.5.2
   shadcn_flutter: ^0.0.37
+
+  drift: ^2.26.1
+  drift_flutter: ^0.2.4
+  path_provider: ^2.1.5
   
 
 
@@ -68,6 +72,8 @@ dev_dependencies:
   riverpod_lint: ^3.0.0-dev.15
   freezed: ^3.0.6
   json_serializable: ^6.9.5
+
+  drift_dev: ^2.26.1
   
 
 
