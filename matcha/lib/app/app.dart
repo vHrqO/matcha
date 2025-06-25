@@ -30,6 +30,7 @@ class _InitProvider extends ConsumerWidget {
     ref.watch(tabGroupOpenedProvider);
     ref.watch(selectedTabsItemProvider);
     ref.watch(selectedTabGroupProvider);
+    ref.watch(appDbProvider);
 
     ref.watch(selectedSessionIdProvider);
     ref.watch(selectedWindowIdProvider);

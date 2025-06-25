@@ -1,5 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+//
+import 'package:matcha/database/database.dart' as database;
+
 part 'app_viewmodel.g.dart';
 
 @riverpod
@@ -41,5 +44,24 @@ class TabGroupOpened extends _$TabGroupOpened {
     }
 
     state = _isOpen;
+  }
+}
+
+//
+@riverpod
+class AppDb extends _$AppDb {
+  late database.AppDatabase _database;
+
+  @override
+  database.AppDatabase build() {
+    // init database
+    _database = database.AppDatabase();
+
+    // When the state is destroyed, close the database
+    ref.onDispose(() {
+      _database.close();
+    });
+
+    return _database;
   }
 }
