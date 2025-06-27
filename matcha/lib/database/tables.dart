@@ -1,46 +1,30 @@
 import 'package:drift/drift.dart';
 
-// CREATE TABLE Session (
-//     id INTEGER PRIMARY KEY,
-//     name TEXT NOT NULL
-// );
-//
 class Session extends Table {
   IntColumn get id => integer().autoIncrement()();
+  IntColumn get position => integer().unique()();
+
   TextColumn get name => text()();
 }
 
-// CREATE TABLE TabsItem (
-//     id INTEGER PRIMARY KEY,
-//     session_id INTEGER NOT NULL,
-
-//     is_group BOOLEAN NOT NULL DEFAULT false,
-
-//     tabs_item_type TEXT NOT NULL,
-//     title TEXT NOT NULL,
-
-//     FOREIGN KEY (session_id) REFERENCES Session(id) ON DELETE CASCADE,
-
-//     CHECK (tabs_item_type IN ('app', 'browser'))
-// );
-//
 class TabsItem extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get sessionId =>
       integer().references(Session, #id, onDelete: KeyAction.cascade)();
+  IntColumn get position => integer()();
 
   BoolColumn get isGroup => boolean().clientDefault(() => false)();
 
   TextColumn get tabsItemType => text().check(tabsItemType.isIn(['app', 'browser']))();
 
   TextColumn get title => text()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {sessionId, position},
+  ];
 }
 
-// CREATE TABLE TabGroup (
-//     id INTEGER PRIMARY KEY,
-
-//     FOREIGN KEY (id) REFERENCES TabsItem(id) ON DELETE CASCADE
-// );
 class TabGroup extends Table {
   IntColumn get id => integer().autoIncrement().references(
     TabsItem,
@@ -49,16 +33,6 @@ class TabGroup extends Table {
   )();
 }
 
-// CREATE TABLE Tab (
-//     id INTEGER PRIMARY KEY,
-//     group_id INTEGER,
-//
-//     url TEXT NOT NULL,
-//
-//     FOREIGN KEY (id) REFERENCES TabsItem(id) ON DELETE CASCADE,
-//     FOREIGN KEY (group_id) REFERENCES TabGroup(id) ON DELETE CASCADE
-// );
-//
 class Tab extends Table {
   IntColumn get id => integer().autoIncrement().references(
     TabsItem,
@@ -66,30 +40,33 @@ class Tab extends Table {
     onDelete: KeyAction.cascade,
   )();
 
-  IntColumn get group_id =>
+  IntColumn get groupId =>
       integer().references(TabGroup, #id, onDelete: KeyAction.cascade)();
 
+  IntColumn get position => integer().check(
+    // If in group, must have position
+    // If not in group, position must be NULL
+    groupId.isNull().equalsExp(position.isNull()),
+  )();
+
   TextColumn get url => text()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {groupId, position},
+  ];
 }
 
-// CREATE TABLE TabsItemTag (
-//     id INTEGER PRIMARY KEY,
-//     tabs_item_id INTEGER NOT NULL,
-//     tag TEXT NOT NULL,
-
-//     FOREIGN KEY (tabs_item_id) REFERENCES TabsItem(id) ON DELETE CASCADE
-//     UNIQUE (tabs_item_id, tag)
-// );
 class TabsItemTag extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get tabs_item_id =>
+  IntColumn get tabsItemId =>
       integer().references(TabsItem, #id, onDelete: KeyAction.cascade)();
 
   TextColumn get tag => text()();
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {tabs_item_id, tag}
-      ];
+    {tabsItemId, tag},
+  ];
 }
