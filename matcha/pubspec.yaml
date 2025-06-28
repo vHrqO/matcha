@@ -37,8 +37,8 @@ dependencies:
 
   chrome_extension: ^0.4.0
 
-  flutter_riverpod: ^3.0.0-dev.15
-  riverpod_annotation: ^3.0.0-dev.15
+  flutter_riverpod: ^3.0.0-dev.16
+  riverpod_annotation: ^3.0.0-dev.16
   fluent_ui: ^4.11.5
   drag_and_drop_lists: ^0.4.2
   fluentui_system_icons: ^1.1.273
@@ -64,12 +64,12 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
   build_runner: 
   custom_lint: 
-  riverpod_generator: ^3.0.0-dev.15
-  riverpod_lint: ^3.0.0-dev.15
+  riverpod_generator: ^3.0.0-dev.16
+  riverpod_lint: ^3.0.0-dev.16
   freezed: ^3.0.6
   json_serializable: ^6.9.5
 
