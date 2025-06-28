@@ -18,11 +18,11 @@ class SessionList extends _$SessionList {
     return sessionList;
   }
 
-  Future<void> addSession(String name) async {
+  Future<void> add(String name) async {
     await ref.read(sessionListRepoProvider.notifier).add(name);
   }
 
-  Future<void> deleteSession(int sessionId) async {
+  Future<void> delete(int sessionId) async {
     await ref.read(sessionListRepoProvider.notifier).delete(sessionId);
   }
 

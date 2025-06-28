@@ -78,7 +78,7 @@ class DeleteButton extends ConsumerWidget {
 
         //
         if (result == true) {
-          ref.read(sessionListProvider.notifier).deleteSession(sessionId);
+          ref.read(sessionListProvider.notifier).delete(sessionId);
           Navigator.of(context).pop();
         }
       },

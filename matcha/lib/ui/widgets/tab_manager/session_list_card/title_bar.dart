@@ -48,7 +48,7 @@ class TitleBar extends ConsumerWidget {
               );
 
               if (sessionName != null && sessionName.isNotEmpty) {
-                ref.read(sessionListProvider.notifier).addSession(sessionName);
+                ref.read(sessionListProvider.notifier).add(sessionName);
               }
             },
           ),
