@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+/// Note: By default, Drift translates Dart names to snake_case in SQL
+
 class Session extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get position => integer().unique()();

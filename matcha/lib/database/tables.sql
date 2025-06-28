@@ -1,55 +1,52 @@
-CREATE TABLE Session (
+CREATE TABLE session (
     id INTEGER PRIMARY KEY,
     position INTEGER NOT NULL UNIQUE,
 
     name TEXT NOT NULL
 );
 
-CREATE TABLE TabsItem (
+CREATE TABLE tabs_item (
     id INTEGER PRIMARY KEY,
-    sessionId INTEGER NOT NULL,
+    session_id INTEGER NOT NULL,
     position INTEGER NOT NULL,
 
-    isGroup BOOLEAN NOT NULL DEFAULT false,
-    tabsItemType TEXT NOT NULL,
-
+    is_group BOOLEAN NOT NULL DEFAULT FALSE,
     title TEXT NOT NULL,
 
-    FOREIGN KEY (sessionId) REFERENCES Session(id) ON DELETE CASCADE,
-    CHECK (tabsItemType IN ('app', 'browser')),
-    UNIQUE (sessionId, position)
+    FOREIGN KEY (session_id) REFERENCES session(id) ON DELETE CASCADE,
+    UNIQUE (session_id, position)
 );
 
-CREATE TABLE TabGroup (
+CREATE TABLE tab_group (
     id INTEGER PRIMARY KEY,
 
-    FOREIGN KEY (id) REFERENCES TabsItem(id) ON DELETE CASCADE
+    FOREIGN KEY (id) REFERENCES tabs_item(id) ON DELETE CASCADE
 );
 
-CREATE TABLE Tab (
+CREATE TABLE tab (
     id INTEGER PRIMARY KEY,
-    groupId INTEGER,
+    group_id INTEGER,
     position INTEGER,
 
     url TEXT NOT NULL,
 
-    FOREIGN KEY (id) REFERENCES TabsItem(id) ON DELETE CASCADE,
-    FOREIGN KEY (groupId) REFERENCES TabGroup(id) ON DELETE CASCADE,
+    FOREIGN KEY (id) REFERENCES tabs_item(id) ON DELETE CASCADE,
+    FOREIGN KEY (group_id) REFERENCES tab_group(id) ON DELETE CASCADE,
 
-    UNIQUE (groupId, position),
+    UNIQUE (group_id, position),
     CHECK (
         -- If in group, must have position
         -- If not in group, position must be NULL
-        (groupId IS NULL) = (position IS NULL)
+        (group_id IS NULL) = (position IS NULL)
     )
 );
 
-CREATE TABLE TabsItemTag (
+CREATE TABLE tabs_item_tag (
     id INTEGER PRIMARY KEY,
-    tabsItemId INTEGER NOT NULL,
+    tabs_item_id INTEGER NOT NULL,
 
     tag TEXT NOT NULL,
     
-    FOREIGN KEY (tabsItemId) REFERENCES TabsItem(id) ON DELETE CASCADE,
-    UNIQUE (tabsItemId, tag)
+    FOREIGN KEY (tabs_item_id) REFERENCES tabs_item(id) ON DELETE CASCADE,
+    UNIQUE (tabs_item_id, tag)
 );

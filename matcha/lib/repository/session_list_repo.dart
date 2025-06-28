@@ -80,12 +80,12 @@ class SessionListRepo extends _$SessionListRepo {
     final customQuery = """
       WITH Ordered AS (
         SELECT id, ROW_NUMBER() OVER (ORDER BY position) - 1 AS new_pos
-        FROM Session
+        FROM session
       )
 
-      UPDATE Session
+      UPDATE session
       SET position = (
-        SELECT new_pos FROM Ordered WHERE Ordered.id = Session.id
+        SELECT new_pos FROM Ordered WHERE Ordered.id = session.id
       );
     """;
     await appDb.customUpdate(customQuery);
