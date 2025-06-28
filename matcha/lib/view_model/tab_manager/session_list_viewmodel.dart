@@ -1,11 +1,8 @@
-import 'package:matcha/repository/session_list_repo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:matcha/model/session/session_meta.dart';
-import 'package:matcha/mock_data/session_list.dart';
-import 'package:matcha/view_model/shared/selected_viewmodel.dart';
 import 'package:matcha/app/constants.dart';
-import 'package:collection/collection.dart';
+import 'package:matcha/repository/session_list_repo.dart';
 
 part 'session_list_viewmodel.g.dart';
 
