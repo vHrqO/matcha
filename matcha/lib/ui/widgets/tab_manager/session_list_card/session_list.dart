@@ -18,7 +18,8 @@ class SessionListRx extends ConsumerWidget {
     final sortedSessionListAsync = ref.watch(sortedSessionListProvider);
 
     switch (sortedSessionListAsync) {
-      case AsyncData(value: final sessionList):
+      case AsyncData(value: final List<SessionMeta> sessionList):
+      case AsyncLoading(value: final List<SessionMeta> sessionList):
         if (sessionList.isEmpty) {
           return const Text('No sessions available.');
         } else {
@@ -26,7 +27,6 @@ class SessionListRx extends ConsumerWidget {
         }
 
       case AsyncError(error: final error, stackTrace: final stackTrace):
-
         // to_do: use notification
         return Text('Oops, something unexpected happened: $error');
 
@@ -81,7 +81,6 @@ class _SessionsListState extends ConsumerState<SessionList> {
         );
       },
 
-      onReorder: (int oldIndex, int newIndex) {
       onReorder: (int oldIndex, int newIndex) async {
         setState(() {
           // The newIndex provided by Flutter is the index after the target item.
@@ -91,7 +90,6 @@ class _SessionsListState extends ConsumerState<SessionList> {
           final item = widget.sessionList.removeAt(oldIndex);
           widget.sessionList.insert(newIndex, item);
         });
-        // data need update
 
         await ref.read(sessionListProvider.notifier).reorder(oldIndex, newIndex);
       },
