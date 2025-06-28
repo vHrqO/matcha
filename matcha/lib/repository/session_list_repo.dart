@@ -7,6 +7,11 @@ import 'package:matcha/view_model/shared/app_viewmodel.dart';
 
 part 'session_list_repo.g.dart';
 
+/// Manually keep the provider alive by using `ref.keepAlive()` to
+/// prevent it from being destroyed during an async gap,
+/// which could otherwise result in accessing `ref` after it has been disposed.
+/// Using `ref.watch()` instead of `ref.read()` can help avoid this issue.
+/// https://github.com/rrousselGit/riverpod/issues/4096
 @riverpod
 class SessionListRepo extends _$SessionListRepo {
   // getAll()
@@ -30,6 +35,8 @@ class SessionListRepo extends _$SessionListRepo {
   }
 
   Future<void> add(String name) async {
+    final link = ref.keepAlive();
+
     final appDb = ref.read(appDbProvider);
 
     final position = await getCount();
@@ -38,13 +45,13 @@ class SessionListRepo extends _$SessionListRepo {
         .into(appDb.session)
         .insert(database.SessionCompanion.insert(name: name, position: position));
 
-    // only if still mounted
-    if (ref.mounted) {
-      ref.invalidateSelf();
-    }
+    ref.invalidateSelf();
+    link.close();
   }
 
   Future<void> updateData(SessionMeta sessionMeta) async {
+    final link = ref.keepAlive();
+
     final appDb = ref.read(appDbProvider);
 
     await (appDb
@@ -53,10 +60,13 @@ class SessionListRepo extends _$SessionListRepo {
           ..where((t) => t.id.equals(sessionMeta.id)))
         .write(database.SessionCompanion(name: Value(sessionMeta.name)));
 
-    if (ref.mounted) ref.invalidateSelf();
+    ref.invalidateSelf();
+    link.close();
   }
 
   Future<void> delete(int id) async {
+    final link = ref.keepAlive();
+
     final appDb = ref.read(appDbProvider);
 
     await (appDb
@@ -80,10 +90,13 @@ class SessionListRepo extends _$SessionListRepo {
     """;
     await appDb.customUpdate(customQuery);
 
-    if (ref.mounted) ref.invalidateSelf();
+    ref.invalidateSelf();
+    link.close();
   }
 
   Future<void> reorder(int oldIndex, int newIndex) async {
+    final link = ref.keepAlive();
+
     final appDb = ref.read(appDbProvider);
 
     // swap positions
@@ -111,10 +124,13 @@ class SessionListRepo extends _$SessionListRepo {
           .write(database.SessionCompanion(position: Value(newIndex)));
     });
 
-    if (ref.mounted) ref.invalidateSelf();
+    ref.invalidateSelf();
+    link.close();
   }
 
   Future<int> getCount() async {
+    final link = ref.keepAlive();
+
     final appDb = ref.read(appDbProvider);
 
     final countOfId = appDb.session.id.count();
@@ -128,6 +144,7 @@ class SessionListRepo extends _$SessionListRepo {
 
     final count = queryResults.first.read(countOfId) ?? 0;
 
+    link.close();
     return count;
   }
 }
