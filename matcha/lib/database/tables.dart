@@ -41,9 +41,9 @@ class Tab extends Table {
   )();
 
   IntColumn get groupId =>
-      integer().references(TabGroup, #id, onDelete: KeyAction.cascade)();
+      integer().nullable().references(TabGroup, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get position => integer().check(
+  IntColumn get position => integer().nullable().check(
     // If in group, must have position
     // If not in group, position must be NULL
     groupId.isNull().equalsExp(position.isNull()),
