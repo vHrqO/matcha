@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matcha/model/tabs_item/tab.dart' as matcha_tab;
 import 'package:matcha/model/tabs_item/tab_group.dart' as matcha_tab_group;
 import 'package:matcha/ui/widgets/shared/tag_select_tile.dart';
-import 'package:matcha/view_model/shared/data_viewmodel.dart';
+import 'package:matcha/view_model/shared/database_viewmodel.dart';
 import 'package:matcha/view_model/tab_manager/session_content_section/edit_tabs_item_dialog_viewmodel.dart';
 
 class TabTagTileRx extends ConsumerWidget {

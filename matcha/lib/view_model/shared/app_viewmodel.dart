@@ -47,21 +47,4 @@ class TabGroupOpened extends _$TabGroupOpened {
   }
 }
 
-//
-@riverpod
-class AppDb extends _$AppDb {
-  late database.AppDatabase _database;
 
-  @override
-  database.AppDatabase build() {
-    // init database
-    _database = database.AppDatabase();
-
-    // When the state is destroyed, close the database
-    ref.onDispose(() {
-      _database.close();
-    });
-
-    return _database;
-  }
-}

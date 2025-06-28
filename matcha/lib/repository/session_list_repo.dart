@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 
 import 'package:matcha/database/database.dart' as database;
 import 'package:matcha/model/session/session_meta.dart';
-import 'package:matcha/view_model/shared/app_viewmodel.dart';
+import 'package:matcha/view_model/shared/database_viewmodel.dart';
 
 part 'session_list_repo.g.dart';
 
@@ -17,7 +17,7 @@ class SessionListRepo extends _$SessionListRepo {
   // getAll()
   @override
   Future<List<SessionMeta>> build() async {
-    final appDb = ref.watch(appDbProvider);
+    final appDb = ref.watch(tabDbProvider);
 
     // order by ui position
     final List<database.SessionData> queryResult =
@@ -37,7 +37,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> add(String name) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(appDbProvider);
+    final appDb = ref.read(tabDbProvider);
 
     final position = await getCount();
 
@@ -52,7 +52,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> updateData(SessionMeta sessionMeta) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(appDbProvider);
+    final appDb = ref.read(tabDbProvider);
 
     await (appDb
           //
@@ -67,7 +67,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> delete(int id) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(appDbProvider);
+    final appDb = ref.read(tabDbProvider);
 
     await (appDb
           //
@@ -97,7 +97,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> reorder(int oldIndex, int newIndex) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(appDbProvider);
+    final appDb = ref.read(tabDbProvider);
 
     // swap positions
     await appDb.transaction(() async {
@@ -131,7 +131,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<int> getCount() async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(appDbProvider);
+    final appDb = ref.read(tabDbProvider);
 
     final countOfId = appDb.session.id.count();
 

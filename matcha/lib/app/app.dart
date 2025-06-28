@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:matcha/ui/views/home_view.dart';
 import 'package:matcha/view_model/shared/app_viewmodel.dart';
+import 'package:matcha/view_model/shared/database_viewmodel.dart';
 import 'package:matcha/view_model/shared/selected_viewmodel.dart';
 
 class MatchaApp extends StatelessWidget {
@@ -26,11 +27,11 @@ class _InitProvider extends ConsumerWidget {
     // Eagerly initialize providers by watching them.
     // By using "watch", the provider will stay alive and not be disposed.
     // and when use ref.invalidate ,a new state will be created.
+    ref.watch(tabDbProvider);
     ref.watch(rightSideOpenedProvider);
     ref.watch(tabGroupOpenedProvider);
     ref.watch(selectedTabsItemProvider);
     ref.watch(selectedTabGroupProvider);
-    ref.watch(appDbProvider);
 
     ref.watch(selectedSessionIdProvider);
     ref.watch(selectedWindowIdProvider);
