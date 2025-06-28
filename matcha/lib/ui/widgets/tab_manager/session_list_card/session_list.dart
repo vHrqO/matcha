@@ -82,6 +82,7 @@ class _SessionsListState extends ConsumerState<SessionList> {
       },
 
       onReorder: (int oldIndex, int newIndex) {
+      onReorder: (int oldIndex, int newIndex) async {
         setState(() {
           // The newIndex provided by Flutter is the index after the target item.
           if (oldIndex < newIndex) {
@@ -91,6 +92,8 @@ class _SessionsListState extends ConsumerState<SessionList> {
           widget.sessionList.insert(newIndex, item);
         });
         // data need update
+
+        await ref.read(sessionListProvider.notifier).reorder(oldIndex, newIndex);
       },
     );
   }
