@@ -17,8 +17,6 @@ class TabsItem extends Table {
 
   BoolColumn get isGroup => boolean().clientDefault(() => false)();
 
-  TextColumn get tabsItemType => text().check(tabsItemType.isIn(['app', 'browser']))();
-
   TextColumn get title => text()();
 
   @override
