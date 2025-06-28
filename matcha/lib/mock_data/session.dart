@@ -3,7 +3,7 @@ import 'package:matcha/model/tabs_item/tab.dart' as matcha_tab;
 import 'package:matcha/model/tabs_item/tab_group.dart' as matcha_tab_group;
 import 'package:matcha/model/tabs_item/tabs_item.dart';
 
-//
+// Mock data for skeletons
 final mockSession = Session(
   id: 0,
   name: 'Session Name',
@@ -15,31 +15,32 @@ final mockSession = Session(
       type: TabsItemType.app,
       title: "Tab Title",
       url: "https://example.com",
+      tagList: ['tag1', 'tag2'],
     ),
     matcha_tab.Tab(
       id: 1,
 
       type: TabsItemType.app,
-      title: "Tab Title",
-      url: "https://example.com",
-      tagList: ['tag1', 'tag2'],
+      title: "Flutter - Dart API docs",
+      url: "https://api.flutter.dev/index.html",
+      tagList: ['flutter', 'docs'],
     ),
   ],
 );
 
-//
+// Mock data for testing
 final mockSession1 = Session(
   id: 1,
-  name: 'flutter',
+  name: 'Flutter',
 
-  //
   tabsItemList: [
     matcha_tab.Tab(
       id: 0,
 
       type: TabsItemType.app,
-      title: "How To Use Style · Sub6Resources/flutter_html Wiki",
-      url: "https://github.com/Sub6Resources/flutter_html/wiki/How-To-Use-Style",
+      title: "Flutter - Dart API docs",
+      url: "https://api.flutter.dev/index.html",
+      tagList: ['flutter', 'docs'],
     ),
     matcha_tab.Tab(
       id: 1,
@@ -47,7 +48,7 @@ final mockSession1 = Session(
       type: TabsItemType.app,
       title: 'flutter_animate | Flutter package',
       url: 'https://pub.dev/packages/flutter_animate',
-      tagList: ['flutter', 'animation'],
+      tagList: ['flutter', 'docs', 'animation'],
     ),
 
     // group
@@ -64,15 +65,15 @@ final mockSession1 = Session(
           type: TabsItemType.app,
           title: "flutter_quill | Flutter package",
           url: "https://pub.dev/packages/flutter_quill",
+          tagList: ['flutter', 'docs'],
         ),
         matcha_tab.Tab(
           id: 4,
           groupId: 2,
           type: TabsItemType.app,
-          title:
-              'objectbox/objectbox-dart: Flutter database for super-fast Dart object persistence',
-          url: 'https://github.com/objectbox/objectbox-dart',
-          tagList: ['flutter'],
+          title: 'drift | Dart package',
+          url: 'https://pub.dev/packages/drift',
+          tagList: ['flutter', 'docs', 'database'],
         ),
       ],
     ),
@@ -81,9 +82,9 @@ final mockSession1 = Session(
     matcha_tab.Tab(
       id: 5,
       type: TabsItemType.app,
-      title: 'c++ - What exactly is std::atomic? - Stack Overflow',
-      url: 'https://stackoverflow.com/questions/31978324/what-exactly-is-stdatomic',
-      tagList: ['c++'],
+      title: 'Colors class - material library - Dart API',
+      url: 'https://api.flutter.dev/flutter/material/Colors-class.html',
+      tagList: ['flutter', 'docs', 'themes'],
     ),
 
     // group
@@ -91,8 +92,8 @@ final mockSession1 = Session(
       id: 6,
       type: TabsItemType.app,
 
-      title: 'documentation ',
-      tagList: ['flutter', 'documentation '],
+      title: 'documentation',
+      tagList: ['flutter', 'documentation'],
       tabList: [
         matcha_tab.Tab(
           id: 7,
@@ -100,93 +101,33 @@ final mockSession1 = Session(
           type: TabsItemType.app,
           title: "Flutter documentation | Flutter",
           url: "https://docs.flutter.dev/",
-          tagList: ['flutter'],
+          tagList: ['flutter', 'docs'],
         ),
         matcha_tab.Tab(
           id: 8,
           groupId: 6,
           type: TabsItemType.app,
-          title: 'Flutter 开发文档 - Flutter 中文文档 - Flutter 中文开发者网站 - Flutter',
-          url: 'https://flutter.cn/docs',
-          tagList: ['flutter'],
-        ),
-      ],
-    ),
-
-    //same
-    matcha_tab.Tab(
-      id: 9,
-      type: TabsItemType.app,
-      title: "How To Use Style · Sub6Resources/flutter_html Wiki",
-      url: "https://github.com/Sub6Resources/flutter_html/wiki/How-To-Use-Style",
-    ),
-    matcha_tab.Tab(
-      id: 10,
-      type: TabsItemType.app,
-      title: 'flutter_animate | Flutter package',
-      url: 'https://pub.dev/packages/flutter_animate',
-      tagList: ['flutter', 'animation'],
-    ),
-
-    // group
-    matcha_tab_group.TabGroup(
-      id: 11,
-      type: TabsItemType.app,
-      title: 'Z Flutter package',
-      tagList: ['flutter', 'package'],
-      tabList: [
-        matcha_tab.Tab(
-          id: 12,
-          groupId: 11,
-          type: TabsItemType.app,
-          title: "flutter_quill | Flutter package",
-          url: "https://pub.dev/packages/flutter_quill",
-        ),
-        matcha_tab.Tab(
-          id: 13,
-          groupId: 11,
-          type: TabsItemType.app,
-          title:
-              'objectbox/objectbox-dart: Flutter database for super-fast Dart object persistence',
-          url: 'https://github.com/objectbox/objectbox-dart',
-          tagList: ['flutter'],
+          title: 'Animatable class - animation library - Dart API',
+          url: 'https://api.flutter.dev/flutter/animation/Animatable-class.html',
+          tagList: ['flutter', 'docs', 'animation'],
         ),
       ],
     ),
 
     //
     matcha_tab.Tab(
-      id: 14,
+      id: 9,
       type: TabsItemType.app,
-      title: 'V c++ - What exactly is std::atomic? - Stack Overflow',
-      url: 'https://stackoverflow.com/questions/31978324/what-exactly-is-stdatomic',
-      tagList: ['c++'],
+      title: "Row class - widgets library - Dart API",
+      url: "https://api.flutter.dev/flutter/widgets/Row-class.html",
+      tagList: ['flutter', 'docs', 'flex'],
     ),
-
-    // group
-    matcha_tab_group.TabGroup(
-      id: 15,
+    matcha_tab.Tab(
+      id: 10,
       type: TabsItemType.app,
-      title: 'X documentation ',
-      tagList: ['flutter', 'documentation '],
-      tabList: [
-        matcha_tab.Tab(
-          id: 16,
-          groupId: 15,
-          type: TabsItemType.app,
-          title: "Flutter documentation | Flutter",
-          url: "https://docs.flutter.dev/",
-          tagList: ['flutter'],
-        ),
-        matcha_tab.Tab(
-          id: 17,
-          groupId: 15,
-          type: TabsItemType.app,
-          title: 'Flutter 开发文档 - Flutter 中文文档 - Flutter 中文开发者网站 - Flutter',
-          url: 'https://flutter.cn/docs',
-          tagList: ['flutter'],
-        ),
-      ],
+      title: 'Column class - widgets library - Dart API',
+      url: 'https://api.flutter.dev/flutter/widgets/Column-class.html',
+      tagList: ['flutter', 'docs', 'flex'],
     ),
   ],
 );
@@ -194,79 +135,58 @@ final mockSession1 = Session(
 //
 final mockSession2 = Session(
   id: 2,
-  name: 'Rust documentation',
+  name: 'Rust , C++',
 
   //
   tabsItemList: [
     matcha_tab.Tab(
-      id: 18,
+      id: 11,
       type: TabsItemType.app,
       title: "The Rust Programming Language - The Rust Programming Language",
       url: "https://doc.rust-lang.org/book/",
-      tagList: ['rust', 'documentation'],
+      tagList: ['rust', 'docs'],
     ),
     matcha_tab.Tab(
-      id: 19,
+      id: 12,
       type: TabsItemType.app,
       title: 'Rust 程式設計語言 - Rust 程式設計語言',
       url: 'https://rust-lang.tw/book-tw/',
-      tagList: ['rust', 'documentation'],
+      tagList: ['rust', 'docs'],
     ),
 
     //
     matcha_tab.Tab(
-      id: 20,
+      id: 13,
       type: TabsItemType.app,
       title: 'c++ - What exactly is std::atomic? - Stack Overflow',
       url: 'https://stackoverflow.com/questions/31978324/what-exactly-is-stdatomic',
-      tagList: ['c++'],
+      tagList: ['c++', 'Stack Overflow'],
     ),
 
     // group
     matcha_tab_group.TabGroup(
-      id: 21,
+      id: 14,
       type: TabsItemType.app,
-      title: 'documentation ',
-      tagList: ['flutter', 'documentation '],
+      title: 'documentation',
+      tagList: ['c++', 'rust', 'docs'],
       tabList: [
         matcha_tab.Tab(
-          id: 22,
-          groupId: 21,
+          id: 15,
+          groupId: 14,
           type: TabsItemType.app,
-          title: "Flutter documentation | Flutter",
-          url: "https://docs.flutter.dev/",
-          tagList: ['flutter'],
+          title: "std - Rust",
+          url: "https://doc.rust-lang.org/std/index.html",
+          tagList: ['rust', 'docs'],
         ),
         matcha_tab.Tab(
-          id: 23,
-          groupId: 21,
+          id: 16,
+          groupId: 14,
           type: TabsItemType.app,
-          title: 'Flutter 开发文档 - Flutter 中文文档 - Flutter 中文开发者网站 - Flutter',
-          url: 'https://flutter.cn/docs',
-          tagList: ['flutter'],
+          title: 'cppreference.com',
+          url: 'https://en.cppreference.com/index.html',
+          tagList: ['c++', 'docs'],
         ),
       ],
-    ),
-  ],
-);
-
-final mockSession3 = Session(
-  id: 3,
-  name: 'Z Session',
-
-  tabsItemList: [
-    matcha_tab.Tab(
-      id: 24,
-      type: TabsItemType.app,
-      title: "Tab Title",
-      url: "https://example.com",
-    ),
-    matcha_tab.Tab(
-      id: 25,
-      type: TabsItemType.app,
-      title: "Tab Title",
-      url: "https://example.com",
-      tagList: ['tag1', 'tag2'],
     ),
   ],
 );
