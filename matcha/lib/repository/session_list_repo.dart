@@ -29,8 +29,10 @@ class SessionListRepo extends _$SessionListRepo {
     return data;
   }
 
-  Future<void> add(String name, int position) async {
+  Future<void> add(String name) async {
     final appDb = ref.read(appDbProvider);
+
+    final position = await getCount();
 
     await appDb
         .into(appDb.session)
