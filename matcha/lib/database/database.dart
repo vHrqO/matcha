@@ -3,11 +3,14 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'package:matcha/database/tables.dart';
-
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Session, TabsItem, TabGroup, Tab, TabsItemTag])
+@DriftDatabase(
+  include: {
+    './tab_tables/tab_tables.drift',
+    './tab_tables/session_list_repo_queries.drift',
+  },
+)
 class TabDatabase extends _$TabDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
   // and a constructor telling drift where the database should be stored.

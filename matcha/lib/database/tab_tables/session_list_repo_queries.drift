@@ -1,0 +1,52 @@
+import 'tab_tables.drift';
+
+
+-- order by ui position
+getAllSession: SELECT * FROM session ORDER BY position ASC;
+
+
+addSession: INSERT INTO session (position, name)
+VALUES (
+  (SELECT COUNT(id) FROM session),
+  :name
+);
+
+
+updateSession: UPDATE session SET name = :name WHERE id = :id;
+
+
+---DeleteSession
+deleteSession_part1: DELETE FROM session WHERE id = :id;
+
+-- reorder after delete
+-- '-1' for zero-based index
+deleteSession_part2: 
+WITH Ordered AS (
+  SELECT id, ROW_NUMBER() OVER (ORDER BY position) - 1 AS new_pos
+  FROM session
+)
+UPDATE session
+  SET position = (
+    SELECT new_pos FROM Ordered WHERE Ordered.id = session.id
+  );
+---
+
+
+---reorderSession
+-- swap positions
+-- because UNIQUE constraint , Assign a tmp value
+-- old position = -1
+reorderSession_part1: UPDATE session SET position = -1 WHERE position = :oldIndex;
+
+-- new position = old position
+reorderSession_part2: UPDATE session SET position = :oldIndex WHERE position = :newIndex;
+
+-- old position = new position
+reorderSession_part3: UPDATE session SET position = :newIndex WHERE position = -1;
+---
+
+
+
+
+
+

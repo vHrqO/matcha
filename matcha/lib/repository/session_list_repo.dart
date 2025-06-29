@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:drift/drift.dart';
 
 import 'package:matcha/database/database.dart' as database;
 import 'package:matcha/model/session/session_meta.dart';
@@ -17,15 +16,9 @@ class SessionListRepo extends _$SessionListRepo {
   // getAll()
   @override
   Future<List<SessionMeta>> build() async {
-    final appDb = ref.watch(tabDbProvider);
+    final tabDb = ref.watch(tabDbProvider);
 
-    // order by ui position
-    final List<database.SessionData> queryResult =
-        await (appDb
-              //
-              .select(appDb.session)
-              ..orderBy([(t) => OrderingTerm(expression: t.position)]))
-            .get();
+    final List<database.SessionData> queryResult = await tabDb.getAllSession().get();
 
     final List<SessionMeta> data = queryResult
         .map((item) => SessionMeta(id: item.id, name: item.name))
@@ -37,13 +30,9 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> add(String name) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(tabDbProvider);
+    final tabDb = ref.read(tabDbProvider);
 
-    final position = await getCount();
-
-    await appDb
-        .into(appDb.session)
-        .insert(database.SessionCompanion.insert(name: name, position: position));
+    await tabDb.addSession(name);
 
     ref.invalidateSelf();
     link.close();
@@ -52,13 +41,9 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> updateData(SessionMeta sessionMeta) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(tabDbProvider);
+    final tabDb = ref.read(tabDbProvider);
 
-    await (appDb
-          //
-          .update(appDb.session)
-          ..where((t) => t.id.equals(sessionMeta.id)))
-        .write(database.SessionCompanion(name: Value(sessionMeta.name)));
+    await tabDb.updateSession(sessionMeta.name, sessionMeta.id);
 
     ref.invalidateSelf();
     link.close();
@@ -67,28 +52,13 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> delete(int id) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(tabDbProvider);
+    final tabDb = ref.read(tabDbProvider);
 
-    await (appDb
-          //
-          .delete(appDb.session)
-          ..where((t) => t.id.equals(id)))
-        .go();
+    await tabDb.transaction(() async {
+      await tabDb.deleteSession_part1(id);
 
-    // reorder after delete
-    // '-1' for zero-based index
-    final customQuery = """
-      WITH Ordered AS (
-        SELECT id, ROW_NUMBER() OVER (ORDER BY position) - 1 AS new_pos
-        FROM session
-      )
-
-      UPDATE session
-      SET position = (
-        SELECT new_pos FROM Ordered WHERE Ordered.id = session.id
-      );
-    """;
-    await appDb.customUpdate(customQuery);
+      await tabDb.deleteSession_part2();
+    });
 
     ref.invalidateSelf();
     link.close();
@@ -97,54 +67,15 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> reorder(int oldIndex, int newIndex) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(tabDbProvider);
+    final tabDb = ref.read(tabDbProvider);
 
-    // swap positions
-    await appDb.transaction(() async {
-      // because UNIQUE constraint , Assign a tmp value
-      // old position = -1
-      await (appDb
-            //
-            .update(appDb.session)
-            ..where((t) => t.position.equals(oldIndex)))
-          .write(database.SessionCompanion(position: Value(-1)));
-
-      // new position = old position
-      await (appDb
-            //
-            .update(appDb.session)
-            ..where((t) => t.position.equals(newIndex)))
-          .write(database.SessionCompanion(position: Value(oldIndex)));
-
-      // old position = new position
-      await (appDb
-            //
-            .update(appDb.session)
-            ..where((t) => t.position.equals(-1)))
-          .write(database.SessionCompanion(position: Value(newIndex)));
+    await tabDb.transaction(() async {
+      await tabDb.reorderSession_part1(oldIndex);
+      await tabDb.reorderSession_part2(oldIndex, newIndex);
+      await tabDb.reorderSession_part3(newIndex);
     });
 
     ref.invalidateSelf();
     link.close();
-  }
-
-  Future<int> getCount() async {
-    final link = ref.keepAlive();
-
-    final appDb = ref.read(tabDbProvider);
-
-    final countOfId = appDb.session.id.count();
-
-    final queryResults =
-        await (appDb
-                //
-                .select(appDb.session)
-                .addColumns([countOfId]))
-            .get();
-
-    final count = queryResults.first.read(countOfId) ?? 0;
-
-    link.close();
-    return count;
   }
 }
