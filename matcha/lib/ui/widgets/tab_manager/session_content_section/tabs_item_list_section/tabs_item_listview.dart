@@ -91,15 +91,25 @@ class _TabsItemListWidgetState extends ConsumerState<TabsItemList> {
           throw ArgumentError('Unknown TabsItem type: ${tabsItem.runtimeType}');
         },
 
-        onReorder: (int oldIndex, int newIndex) {
+        onReorder: (int oldIndex, int newIndex) async {
+          int oldId = -1;
+          int newId = -1;
+
           setState(() {
             // The newIndex provided by Flutter is the index after the target item.
             if (oldIndex < newIndex) {
               newIndex -= 1;
             }
+            oldId = widget.tabsItemList[oldIndex].id;
+            newId = widget.tabsItemList[newIndex].id;
+
             final item = widget.tabsItemList.removeAt(oldIndex);
             widget.tabsItemList.insert(newIndex, item);
           });
+
+          await ref
+              .read(sessionContentOrderProvider.notifier)
+              .reorder(oldIndex, newIndex, oldId, newId);
         },
       ),
     );
