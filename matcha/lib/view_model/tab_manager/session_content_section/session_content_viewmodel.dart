@@ -1,3 +1,7 @@
+import 'package:matcha/model/session/session_meta.dart';
+import 'package:matcha/model/tabs_item/tab.dart' as matcha_tab;
+import 'package:matcha/repository/session_list_repo.dart';
+import 'package:matcha/repository/session_repo.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:matcha/mock_data/session.dart';
@@ -11,107 +15,120 @@ part 'session_content_viewmodel.g.dart';
 
 @riverpod
 class SessionContent extends _$SessionContent {
+  // to_do : no late
   late Session _session;
 
   @override
   Future<Session> build(int sessionId) async {
-    // from database
-    // not found , throw exception
-    if (sessionId == 1) {
-      _session = mockSession1;
-    } else if (sessionId == 2) {
-      _session = mockSession2;
-    } else if (sessionId == 3) {
-      _session = mockSession3;
-    } else {
-      _session = mockSession1;
-    }
+    _session = await ref.watch(sessionRepoProvider(sessionId).future);
 
     return _session;
   }
 
-  Future<void> updateSession(Session session) async {
-    // to database
-    _session = session;
-
-    //
-    ref.invalidateSelf();
-    ref.read(selectedTabGroupProvider.notifier).dataHasChanged(_session.id , TabsItemType.app);
-  }
-
   Future<void> updateSessionName(String name) async {
-    // to database
-    _session.name = name;
-
-    //
-    ref.invalidateSelf();
+    await ref
+        .read(sessionListRepoProvider.notifier)
+        .updateData(SessionMeta(id: _session.id, name: name));
   }
 
   Future<void> updateTabsItem(TabsItem tabsItem) async {
-    // to database
-    // sql check - if id exists in database
-    final isItemExists = _session.tabsItemList.any((item) => item.id == tabsItem.id);
+    final exists = await ref
+        .read(sessionRepoProvider(_session.id).notifier)
+        .hasTabsItem(tabsItem);
 
-    // final isItemExistsInGroup = _session.tabsItemList.any((item) {
-    //   if (item is matcha_tab_group.TabGroup) {
-    //     return item.tabList.any((item) => item.id == tabsItem.id);
-    //   }
-    //   return false;
-    // },);
-
-    if (isItemExists) {
-      // update existing
-      final index = _session.tabsItemList.indexWhere((item) => item.id == tabsItem.id);
-      if (index != -1) {
-        _session.tabsItemList[index] = tabsItem;
+    if (exists) {
+      if (tabsItem is matcha_tab_group.TabGroup) {
+        await ref
+            .read(sessionRepoProvider(_session.id).notifier)
+            .updateTabGroup(tabsItem);
+      } else if (tabsItem is matcha_tab.Tab) {
+        await ref.read(sessionRepoProvider(_session.id).notifier).updateTab(tabsItem);
       }
     } else {
-      // add new
-      _session.tabsItemList.add(tabsItem);
+      if (tabsItem is matcha_tab_group.TabGroup) {
+        await ref.read(sessionRepoProvider(_session.id).notifier).addTabGroup(tabsItem);
+      } else if (tabsItem is matcha_tab.Tab) {
+        await ref.read(sessionRepoProvider(_session.id).notifier).addTab(tabsItem);
+      }
     }
 
     //
     ref.invalidateSelf();
-    ref.read(selectedTabGroupProvider.notifier).dataHasChanged(_session.id, TabsItemType.app);
+    ref
+        .read(selectedTabGroupProvider.notifier)
+        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
   Future<void> addAllTabsItem(List<TabsItem> tabsItemList) async {
-    // to database
-    for (final tab in tabsItemList) {
-      // sql check - if id exists in database
-      final isTabExists = _session.tabsItemList.any((item) => item.id == tab.id);
-      if (isTabExists) {
-        throw Exception("Tab with id ${tab.id} already exists");
-      }
+    // to_do : improve perf
+    for (final item in tabsItemList) {
+      await updateTabsItem(item);
     }
 
-    _session.tabsItemList.addAll(tabsItemList);
-
     //
     ref.invalidateSelf();
-    ref.read(selectedTabGroupProvider.notifier).dataHasChanged(_session.id, TabsItemType.app);
+    ref
+        .read(selectedTabGroupProvider.notifier)
+        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
-  Future<void> removeTabsItem(int id) async {
-    // to database
-    _session.tabsItemList.removeWhere((item) => item.id == id);
+  Future<void> removeTabsItem(TabsItem tabsItem) async {
+    await ref.read(sessionRepoProvider(_session.id).notifier).removeTabsItem(tabsItem);
 
     //
     ref.invalidateSelf();
-    ref.read(selectedTabGroupProvider.notifier).dataHasChanged(_session.id, TabsItemType.app);
+    ref
+        .read(selectedTabGroupProvider.notifier)
+        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
-  Future<void> removeAllTabsItem(List<int> idList) async {
-    // for (final id in idList) {
-    //   ref.read(selectedTabsItemProvider.notifier).removeSelected(id);
-    // }
+  Future<void> removeAllTabsItem(List<TabsItem> tabsItemList) async {
+    // await ref.read(sessionRepoProvider(_session.id).notifier).removeAllTabsItem(idList);
 
-    // to database
-    _session.tabsItemList.removeWhere((item) => idList.contains(item.id));
+    // to_do : improve perf
+    for (final item in tabsItemList) {
+      await removeTabsItem(item);
+    }
 
     //
     ref.invalidateSelf();
-    ref.read(selectedTabGroupProvider.notifier).dataHasChanged(_session.id, TabsItemType.app);
+    ref
+        .read(selectedTabGroupProvider.notifier)
+        .dataHasChanged(_session.id, TabsItemType.app);
+  }
+
+  Future<void> moveTabInGroup(matcha_tab.Tab tab, int groupId) async {
+    // to_do : refactor selectedTabGroupProvider
+
+    await ref
+        .read(sessionRepoProvider(_session.id).notifier)
+        .moveTabInGroup(tab, groupId);
+
+    //
+    ref.invalidateSelf();
+    ref
+        .read(selectedTabGroupProvider.notifier)
+        .dataHasChanged(_session.id, TabsItemType.app);
+  }
+}
+
+@riverpod
+class SessionContentOrder extends _$SessionContentOrder {
+  @override
+  Future<void> build() async {
+    //
+  }
+
+  Future<void> reorder(int oldIndex, int newIndex, int oldId, int newId) async {
+    await ref
+        .read(sessionOrderRepoProvider.notifier)
+        .reorder(oldIndex, newIndex, oldId, newId);
+  }
+
+  Future<void> reorderInGroup(int oldIndex, int newIndex, int oldId, int newId) async {
+    await ref
+        .read(sessionOrderRepoProvider.notifier)
+        .reorderInGroup(oldIndex, newIndex, oldId, newId);
   }
 }
 
