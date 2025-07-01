@@ -45,7 +45,7 @@ class _TagSelectTileState extends State<TagSelectTile> {
             return element.startsWith(value);
           }).toList();
         } else {
-          _suggestTags = [];
+          _suggestTags = _availableSuggestTags;
         }
       });
     });
