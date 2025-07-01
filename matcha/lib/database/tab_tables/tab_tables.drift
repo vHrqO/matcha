@@ -8,17 +8,29 @@ CREATE TABLE session (
 CREATE TABLE tabs_item (
     id INTEGER PRIMARY KEY,
     session_id INTEGER NOT NULL,
-    position INTEGER NOT NULL,
+    position INTEGER,
 
     is_group BOOLEAN NOT NULL DEFAULT FALSE,
+    is_inside_group BOOLEAN NOT NULL DEFAULT FALSE,  
+
     title TEXT NOT NULL,
 
     FOREIGN KEY (session_id) REFERENCES session(id) ON DELETE CASCADE,
-    UNIQUE (session_id, position)
+    UNIQUE (session_id, position),
+    CHECK (
+        -- If inside group, position must be NULL
+        -- If not inside group, must have position
+        (is_inside_group = TRUE) = (position IS NULL)
+    ),
+    CHECK (
+        -- If this is a group, it cannot be inside another group
+        NOT (is_group = TRUE AND is_inside_group = TRUE)
+    )
 );
 
 CREATE TABLE tab_group (
     id INTEGER PRIMARY KEY,
+    group_color TEXT NOT NULL,
 
     FOREIGN KEY (id) REFERENCES tabs_item(id) ON DELETE CASCADE
 );
