@@ -115,7 +115,7 @@ class DeleteButton extends ConsumerWidget {
         ref.read(selectedTabsItemProvider.notifier).clearSelected();
         await ref
             .read(sessionContentProvider(sessionId).notifier)
-            .removeTabsItem(tabsItem.id);
+            .removeTabsItem(tabsItem);
 
         Navigator.of(context).pop();
       },

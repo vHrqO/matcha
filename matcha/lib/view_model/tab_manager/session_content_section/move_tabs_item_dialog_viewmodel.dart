@@ -42,7 +42,7 @@ class MoveTabsItemForm extends _$MoveTabsItemForm {
     // remove from current session
     await ref
         .read(sessionContentProvider(_sessionId).notifier)
-        .removeAllTabsItem(idList);
+        .removeAllTabsItem(tabsItemList);
 
     // move to new session
     await ref

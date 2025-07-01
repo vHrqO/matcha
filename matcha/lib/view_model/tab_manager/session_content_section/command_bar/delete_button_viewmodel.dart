@@ -66,7 +66,7 @@ class DeleteButton extends _$DeleteButton {
     // remove tabs
     await ref
         .read(sessionContentProvider(sessionId).notifier)
-        .removeAllTabsItem(idList);
+        .removeAllTabsItem(selectedTabsItem.values.toList());
 
     ref.read(selectedTabsItemProvider.notifier).clearSelected();
   }
@@ -110,7 +110,7 @@ class DeleteButtonTap extends _$DeleteButtonTap {
     // remove tabs
     await ref
         .read(sessionContentProvider(_selectedSessionId!).notifier)
-        .removeTabsItem(tabsItem.id);
+        .removeTabsItem(tabsItem);
 
     ref.read(selectedTabsItemProvider.notifier).clearSelected();
   }

@@ -68,20 +68,26 @@ class MoveToGroupButton extends _$MoveToGroupButton {
       }
     }).toList();
 
+    // to_do : wait - refactor selectedTabGroupProvider
+    // for (var element in toMoveTabs) {
+    //   await ref.read(sessionContentProvider(sessionId).notifier).moveTabInGroup(element, targetGroup.id);
+    // }
+
+    //------------------------------------------
     // add to group
     targetGroup.tabList.addAll(toMoveTabs);
 
     // remove from session
     await ref
         .read(sessionContentProvider(sessionId).notifier)
-        .removeAllTabsItem(idList);
+        .removeAllTabsItem(selectedTabsItem.values.toList());
 
     // update  group
     await ref
         .read(sessionContentProvider(sessionId).notifier)
         .updateTabsItem(targetGroup);
 
-    //
+    //-------------------------------------------
 
     ref.read(selectedTabsItemProvider.notifier).clearSelected();
   }
@@ -104,6 +110,8 @@ class MoveToGroupButtonTap extends _$MoveToGroupButtonTap {
   }
 
   Future<void> move(int sessionId, matcha_tab.Tab tab) async {
+    final link = ref.keepAlive();
+
     if (!_enabled) {
       throw Exception('MoveToGroupButtonTap is not enabled');
     }
@@ -121,12 +129,14 @@ class MoveToGroupButtonTap extends _$MoveToGroupButtonTap {
     targetGroup.tabList.add(tab);
 
     // remove from session
-    await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab.id);
+    await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
 
     // update  group
     await ref
         .read(sessionContentProvider(sessionId).notifier)
         .updateTabsItem(targetGroup);
+
+    link.close();
   }
 }
 
@@ -198,6 +208,9 @@ class MoveOutGroupButton extends _$MoveOutGroupButton {
     targetGroup.tabList.removeWhere((tab) {
       return idList.contains(tab.id);
     });
+    await ref
+        .read(sessionContentProvider(sessionId).notifier)
+        .removeAllTabsItem(toMoveTabs);
 
     // update  group
     await ref
@@ -208,8 +221,6 @@ class MoveOutGroupButton extends _$MoveOutGroupButton {
     await ref
         .read(sessionContentProvider(sessionId).notifier)
         .addAllTabsItem(toMoveTabs);
-
-    //
 
     ref.read(selectedTabsItemProvider.notifier).clearSelected();
   }
@@ -232,6 +243,8 @@ class MoveOutGroupButtonTap extends _$MoveOutGroupButtonTap {
   }
 
   Future<void> move(int sessionId, matcha_tab.Tab tab) async {
+    final link = ref.keepAlive();
+
     if (!_enabled) {
       throw Exception('MoveOutGroupButtonTap is not enabled');
     }
@@ -247,6 +260,7 @@ class MoveOutGroupButtonTap extends _$MoveOutGroupButtonTap {
 
     // remove from group
     targetGroup.tabList.remove(tab);
+    await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
 
     // update  group
     await ref
@@ -255,5 +269,7 @@ class MoveOutGroupButtonTap extends _$MoveOutGroupButtonTap {
 
     // add to session
     await ref.read(sessionContentProvider(sessionId).notifier).updateTabsItem(tab);
+
+    link.close();
   }
 }
