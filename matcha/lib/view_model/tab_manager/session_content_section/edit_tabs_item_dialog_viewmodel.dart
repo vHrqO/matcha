@@ -63,10 +63,10 @@ class EditTabForm extends _$EditTabForm {
       // add new tab
 
       // tmp , use repository to get from database
-      final tabId = DateTime.now().millisecondsSinceEpoch;
+      // final tabId = DateTime.now().millisecondsSinceEpoch;
 
       final newTab = matcha_tab.Tab(
-        id: tabId,
+        id: -1,
         type: TabsItemType.app,
         title: _title,
         url: _url,
@@ -139,10 +139,10 @@ class EditTabGroupForm extends _$EditTabGroupForm {
       // add new tab group
 
       // tmp , use repository to get from database
-      final tabId = DateTime.now().millisecondsSinceEpoch;
+      // final tabId = DateTime.now().millisecondsSinceEpoch;
 
       final newTabGroup = matcha_tab_group.TabGroup(
-        id: tabId,
+        id: -1,
         type: TabsItemType.app,
         title: _tabGroupTitle,
         tabList: [],

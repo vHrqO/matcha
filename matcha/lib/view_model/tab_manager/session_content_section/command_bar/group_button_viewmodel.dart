@@ -53,15 +53,15 @@ class GroupButton extends _$GroupButton {
       final idList = selectedTabs.keys.toList();
 
       // tmp , use repository to get from database
-      final groupItemId = DateTime.now().millisecondsSinceEpoch;
+      // final groupItemId = DateTime.now().millisecondsSinceEpoch;
 
       final newTabGroup = matcha_tab_group.TabGroup(
-        id: groupItemId,
+        id: -1,
         type: TabsItemType.app,
         title: 'New TabGroup',
         tabList: selectedTabs.values.map((item) {
           item as matcha_tab.Tab;
-          item.groupId = groupItemId;
+          item.groupId = -1;
           return item;
         }).toList(),
       );
@@ -69,7 +69,7 @@ class GroupButton extends _$GroupButton {
       // remove tabs will be in new group
       await ref
           .read(sessionContentProvider(sessionId).notifier)
-          .removeAllTabsItem(idList);
+          .removeAllTabsItem(selectedTabs.values.toList());
 
       // add new tab group to session
       await ref
@@ -85,14 +85,14 @@ class GroupButton extends _$GroupButton {
       final selectedTabGroup =
           ref.read(selectedTabsItemProvider).values.first as matcha_tab_group.TabGroup;
 
-      final tabGroupId = selectedTabGroup.id;
+      final tabGroup = selectedTabGroup;
       final tabList = selectedTabGroup.tabList;
 
       // remove group
       ref.invalidate(tabGroupOpenedProvider);
       await ref
           .read(sessionContentProvider(sessionId).notifier)
-          .removeTabsItem(tabGroupId);
+          .removeTabsItem(tabGroup);
 
       // remove groupId
       for (final tab in selectedTabGroup.tabList) {

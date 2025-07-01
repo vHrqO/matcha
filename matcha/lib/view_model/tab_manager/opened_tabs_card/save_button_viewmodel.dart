@@ -63,7 +63,7 @@ class SaveButton extends _$SaveButton {
     }
 
     // assign new id , from database
-    saveTabsItem.id = DateTime.now().millisecondsSinceEpoch;
+    saveTabsItem.id = -1;
 
     // add to session
     await ref
