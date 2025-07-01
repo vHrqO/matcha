@@ -24,6 +24,7 @@ class TabsItemListRx extends ConsumerWidget {
 
     switch (sortedSelectedSessionAsync) {
       case AsyncData(value: final Session session):
+      case AsyncLoading(value: final Session session):
         return TabsItemList(tabsItemList: session.tabsItemList);
 
       case AsyncError(error: final error, stackTrace: final stackTrace):
