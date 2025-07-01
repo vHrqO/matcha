@@ -1,3 +1,5 @@
+enum TabsItemType { app, browser }
+
 interface class TabsItem {
   int id;
   TabsItemType type;
@@ -12,5 +14,3 @@ interface class TabsItem {
     this.tagList = const [],
   });
 }
-
-enum TabsItemType { app, browser }
