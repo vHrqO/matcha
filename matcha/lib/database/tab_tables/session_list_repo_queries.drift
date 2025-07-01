@@ -31,7 +31,7 @@ UPDATE session
   );
 ---
 
-
+--to_do : use id
 ---reorderSession
 -- swap positions
 -- because UNIQUE constraint , Assign a tmp value
