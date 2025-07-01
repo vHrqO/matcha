@@ -1,6 +1,9 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:matcha/database/database.dart' as database;
+import 'package:matcha/tmp/TestWidget.dart';
 
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_bar/add_button.dart';
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_bar/delete_button.dart';
@@ -11,6 +14,8 @@ import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_ba
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_bar/open_button.dart';
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_bar/select_dropdown.dart';
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/command_bar/sort_dropdown.dart';
+import 'package:matcha/view_model/shared/app_viewmodel.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CommandBar extends StatelessWidget {
   const CommandBar({super.key});
@@ -83,7 +88,7 @@ class CommandBar extends StatelessWidget {
             const Spacer(),
 
             // test
-            // TextButton(child: Text("test"), onPressed: () {}),
+            TestWidget(),
 
             // right side
             Tooltip(message: 'Select', child: SelectDropdown()),
