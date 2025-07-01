@@ -9,6 +9,7 @@ part 'database.g.dart';
   include: {
     './tab_tables/tab_tables.drift',
     './tab_tables/session_list_repo_queries.drift',
+    './tab_tables/session_repo_queries.drift',
   },
 )
 class TabDatabase extends _$TabDatabase {

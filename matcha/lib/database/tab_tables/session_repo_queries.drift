@@ -1,0 +1,287 @@
+import 'tab_tables.drift';
+
+
+------------- ok
+getLatestAddId: SELECT last_insert_rowid() AS latest_add_id;
+
+getSessionName: SELECT name FROM session WHERE id = :id;
+
+------ TabsItem
+hasTabsItem:
+SELECT EXISTS (
+    --- '1' as placeholder
+    SELECT 1 FROM tabs_item WHERE id = :id
+);
+
+addTabsItem:
+INSERT INTO tabs_item (session_id, position, is_group, is_inside_group, title)
+VALUES (
+    :sessionId,
+    CASE 
+      WHEN :isInsideGroup = true THEN NULL
+      ELSE (SELECT COUNT(id) FROM tabs_item WHERE session_id = :sessionId AND is_inside_group = false)
+    END,
+    :isGroup,
+    :isInsideGroup,
+    :title
+);
+
+updateTabsItem:
+UPDATE tabs_item
+SET title = :title
+WHERE id = :tabsItemId;
+
+
+-- ON DELETE CASCADE
+-- auto remove tab , tab_group, tabs_item_tag
+removeTabsItem:
+DELETE FROM tabs_item
+WHERE id = :tabsItemId;
+
+-- removeAllTabsItem:
+-- DELETE FROM tabs_item
+-- WHERE id IN :tabsItemIdList;
+
+
+getAllOutGroupTabsItems:
+SELECT
+    tabs_item.*,
+    tab.url,
+    (
+      SELECT GROUP_CONCAT(tag)
+      FROM tabs_item_tag
+      WHERE tabs_item_tag.tabs_item_id = tabs_item.id
+      ORDER BY tag
+    ) AS tagList
+FROM tabs_item
+LEFT JOIN tab ON tabs_item.id = tab.id
+WHERE tabs_item.session_id = :sessionId
+  AND tabs_item.is_inside_group = FALSE
+ORDER BY tabs_item.position;
+
+getAllInGroupTabsItems:
+SELECT
+    tabs_item.id,
+    tabs_item.session_id,
+    tabs_item.is_group,
+    tabs_item.is_inside_group,
+    tabs_item.title,
+    tab.url,
+    tab.position,
+    (
+      SELECT GROUP_CONCAT(tag)
+      FROM tabs_item_tag
+      WHERE tabs_item_tag.tabs_item_id = tabs_item.id
+      ORDER BY tag
+    ) AS tagList
+FROM tabs_item
+JOIN tab ON tabs_item.id = tab.id
+WHERE tabs_item.session_id = :sessionId
+  AND tabs_item.is_inside_group = TRUE
+  AND tab.group_id = :groupId
+ORDER BY tab.position;
+
+
+
+
+
+
+------
+
+
+------ Tab
+addTab:
+INSERT INTO tab (id, url)
+VALUES (
+    :tabsItemId,
+    :url
+);
+
+addTabInGroup:
+INSERT INTO tab (
+  id,         
+  group_id,   
+  position,   
+  url
+)
+VALUES (
+  :tabsItemId,
+  :groupId,
+  (SELECT COUNT(*) FROM tab WHERE group_id = :groupId),
+  :url
+);
+
+updateTab: 
+UPDATE tab
+SET url = :url
+WHERE id = :tabsItemId;
+
+------
+
+
+------ TabGroup
+addTabGroup:
+INSERT INTO tab_group (id ,group_color)
+VALUES (:tabsItemId, :groupColor);
+
+updateTabGroup:
+UPDATE tab_group
+SET group_color = :groupColor
+WHERE id = :groupId;
+
+
+------
+
+
+
+------ Tag
+addTag:
+INSERT OR IGNORE INTO tabs_item_tag (tabs_item_id, tag)
+VALUES (
+    :tabsItemId,
+    :tag
+);
+
+removeTag:
+DELETE FROM tabs_item_tag
+WHERE
+  tabs_item_id = :tabsItemId
+  AND tag         = :tag;
+
+getAllTags:
+SELECT tag
+FROM tabs_item_tag
+WHERE tabs_item_id = :tabsItemId;
+
+getAllDistinctTags:
+SELECT DISTINCT tag FROM tabs_item_tag;
+
+
+
+
+------
+
+
+------ reorder
+reorderRemoveTabsItem_out:
+  WITH Ordered AS (
+    SELECT
+      tabs_item.id,
+      ROW_NUMBER() OVER (ORDER BY tabs_item.position) - 1 AS new_pos
+    FROM tabs_item
+    LEFT JOIN tab
+      ON tabs_item.id = tab.id
+    WHERE
+      tabs_item.session_id = :sessionId
+      AND tab.group_id IS NULL
+  )
+  UPDATE tabs_item
+  SET position = (
+    SELECT new_pos
+    FROM Ordered
+    WHERE Ordered.id = tabs_item.id
+  )
+  WHERE tabs_item.id IN (SELECT id FROM Ordered);
+
+reorderRemoveTabsItem_in:
+  WITH Ordered AS (
+    SELECT
+      id,
+      ROW_NUMBER() OVER (ORDER BY position) - 1 AS new_pos
+    FROM tab
+    WHERE group_id = :groupId
+  )
+  UPDATE tab
+  SET position = (
+    SELECT new_pos
+    FROM Ordered
+    WHERE Ordered.id = tab.id
+  )
+  WHERE group_id = :groupId;
+
+
+---Reorder the tabs_item
+reorderTabsItem_part1:
+UPDATE tabs_item
+SET position = -1
+WHERE
+    id       = :oldId;
+
+reorderTabsItem_part2:
+UPDATE tabs_item
+SET position = :oldIndex
+WHERE
+ id       = :newId;
+
+reorderTabsItem_part3:
+UPDATE tabs_item
+SET position = :newIndex
+WHERE
+id       = :oldId;
+---
+
+--- Reorder tabs in a group
+reorderTabInGroup_part1:
+  UPDATE tab
+  SET position = -1
+  WHERE
+    id       = :oldId;
+
+
+  reorderTabInGroup_part2:
+  UPDATE tab
+  SET position = :oldIndex
+  WHERE
+    id       = :newId;
+
+
+  reorderTabInGroup_part3:
+  UPDATE tab
+  SET position = :newIndex
+  WHERE
+    id       = :oldId;
+
+---
+
+
+
+------------------------------
+
+
+
+
+  
+---------
+
+moveTabInGroup_part1:
+UPDATE tab
+SET
+  group_id = :groupId,
+  position = (
+    SELECT COUNT(*) 
+    FROM tab
+    WHERE group_id = :groupId
+  )
+WHERE id = :tabsItemId;
+
+moveTabInGroup_part2:
+UPDATE tabs_item
+SET 
+    position = NULL,
+    is_inside_group = TRUE
+WHERE id = :tabsItemId;
+
+
+
+
+
+moveTabOutGroup:
+UPDATE tab
+SET
+  group_id = NULL,
+  position = NULL
+WHERE id = :tabsItemId;
+
+
+
+
