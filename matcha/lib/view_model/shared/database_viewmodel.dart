@@ -25,10 +25,9 @@ class TabDb extends _$TabDb {
 
 @riverpod
 Future<List<String>> existingTags(Ref ref) async {
-  // read from database
-  // no need to database , if save sussessful,
-  // next time will read from database
-  final tags = mockExistingTags;
+  final tabDb = ref.watch(tabDbProvider);
+
+  final tags = await tabDb.getAllDistinctTags().get();
 
   return tags;
 }
