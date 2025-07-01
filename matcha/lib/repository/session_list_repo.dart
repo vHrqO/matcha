@@ -75,7 +75,6 @@ class SessionListRepo extends _$SessionListRepo {
       await tabDb.reorderSession_part3(newIndex);
     });
 
-    ref.invalidateSelf();
     link.close();
   }
 }
