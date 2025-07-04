@@ -15,40 +15,47 @@ part 'session_content_viewmodel.g.dart';
 
 @riverpod
 class SessionContent extends _$SessionContent {
-  // to_do : no late
   late Session _session;
+
+  int _sessionId = -1;
 
   @override
   Future<Session> build(int sessionId) async {
+    _sessionId = sessionId;
     _session = await ref.watch(sessionRepoProvider(sessionId).future);
 
     return _session;
   }
 
   Future<void> updateSessionName(String name) async {
+    // Wait for first state to be computed
+    await future;
+
     await ref
         .read(sessionListRepoProvider.notifier)
-        .updateData(SessionMeta(id: _session.id, name: name));
+        .updateData(SessionMeta(id: _sessionId, name: name));
   }
 
   Future<void> updateTabsItem(TabsItem tabsItem) async {
+    await future;
+
     final exists = await ref
-        .read(sessionRepoProvider(_session.id).notifier)
+        .read(sessionRepoProvider(_sessionId).notifier)
         .hasTabsItem(tabsItem);
 
     if (exists) {
       if (tabsItem is matcha_tab_group.TabGroup) {
         await ref
-            .read(sessionRepoProvider(_session.id).notifier)
+            .read(sessionRepoProvider(_sessionId).notifier)
             .updateTabGroup(tabsItem);
       } else if (tabsItem is matcha_tab.Tab) {
-        await ref.read(sessionRepoProvider(_session.id).notifier).updateTab(tabsItem);
+        await ref.read(sessionRepoProvider(_sessionId).notifier).updateTab(tabsItem);
       }
     } else {
       if (tabsItem is matcha_tab_group.TabGroup) {
-        await ref.read(sessionRepoProvider(_session.id).notifier).addTabGroup(tabsItem);
+        await ref.read(sessionRepoProvider(_sessionId).notifier).addTabGroup(tabsItem);
       } else if (tabsItem is matcha_tab.Tab) {
-        await ref.read(sessionRepoProvider(_session.id).notifier).addTab(tabsItem);
+        await ref.read(sessionRepoProvider(_sessionId).notifier).addTab(tabsItem);
       }
     }
 
@@ -57,6 +64,8 @@ class SessionContent extends _$SessionContent {
   }
 
   Future<void> addAllTabsItem(List<TabsItem> tabsItemList) async {
+    await future;
+
     // to_do : improve perf
     for (final item in tabsItemList) {
       await updateTabsItem(item);
@@ -67,14 +76,18 @@ class SessionContent extends _$SessionContent {
   }
 
   Future<void> removeTabsItem(TabsItem tabsItem) async {
-    await ref.read(sessionRepoProvider(_session.id).notifier).removeTabsItem(tabsItem);
+    await future;
+
+    await ref.read(sessionRepoProvider(_sessionId).notifier).removeTabsItem(tabsItem);
 
     //
     ref.invalidateSelf();
   }
 
   Future<void> removeAllTabsItem(List<TabsItem> tabsItemList) async {
-    // await ref.read(sessionRepoProvider(_session.id).notifier).removeAllTabsItem(idList);
+    await future;
+
+    // await ref.read(sessionRepoProvider(_sessionId).notifier).removeAllTabsItem(idList);
 
     // to_do : improve perf
     for (final item in tabsItemList) {
@@ -86,10 +99,10 @@ class SessionContent extends _$SessionContent {
   }
 
   Future<void> moveTabInGroup(matcha_tab.Tab tab, int groupId) async {
-    // to_do : refactor selectedTabGroupProvider
+    await future;
 
     await ref
-        .read(sessionRepoProvider(_session.id).notifier)
+        .read(sessionRepoProvider(_sessionId).notifier)
         .moveTabInGroup(tab, groupId);
 
     //
