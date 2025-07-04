@@ -1,3 +1,6 @@
+import 'package:matcha/model/session/session.dart';
+import 'package:matcha/repository/tab_group_repo.dart';
+import 'package:matcha/view_model/shared/app_viewmodel.dart';
 import 'package:matcha/view_model/tab_manager/opened_tabs_card/opened_tabs_card_viewmodel.dart';
 import 'package:matcha/view_model/tab_manager/session_content_section/session_content_viewmodel.dart';
 import 'package:matcha/view_model/tab_manager/session_list_viewmodel.dart';
@@ -171,85 +174,105 @@ class SelectedTabsItem extends _$SelectedTabsItem {
   }
 }
 
-//rename , opened
 @riverpod
 class SelectedTabGroup extends _$SelectedTabGroup {
-  matcha_tab_group.TabGroup? _selectedTabGroup;
-
-  // selected by session or opened tabs
-  TabsItemType? _tabGroupType;
-  int? _objectId;
-
-  @override
-  bool updateShouldNotify(
-    AsyncValue<matcha_tab_group.TabGroup?> previous,
-    AsyncValue<matcha_tab_group.TabGroup?> next,
-  ) {
-    // always notify
-    return true;
-  }
-
-  // sessionId or windowId
-  Future<void> dataHasChanged(int objectId, TabsItemType tabGroupType) async {
-    // to_do: find a better way , such as ref.watch
-    // force rebuild
-
-    _objectId = objectId;
-
-    // type same as last time
-    if (_tabGroupType == tabGroupType) {
-      state = state;
-      // state = AsyncData(_selectedTabGroup);
-    }
-  }
-
   @override
   Future<matcha_tab_group.TabGroup?> build() async {
-    // update from session
-    if (_tabGroupType == TabsItemType.app) {
-      if (_objectId != null && _selectedTabGroup != null) {
-        final session = await ref.read(sessionContentProvider(_objectId!).future);
+    final tabGroupRepoState = ref.watch(tabGroupRepoProvider);
+    final savedTabGroup = tabGroupRepoState.tabGroup;
+    final sourceId = tabGroupRepoState.sourceId;
 
-        _selectedTabGroup =
-            session.tabsItemList.firstWhere((item) => item.id == _selectedTabGroup!.id)
-                as matcha_tab_group.TabGroup;
-      }
+    if (savedTabGroup == null) {
+      return null;
     }
 
-    //  update from browser
-    if (_tabGroupType == TabsItemType.browser) {
-      if (_objectId != null && _selectedTabGroup != null) {
-        final window = await ref.read(windowProvider(_objectId!).future);
-
-        _selectedTabGroup =
-            window.tabsItemList.firstWhere((item) => item.id == _selectedTabGroup!.id)
-                as matcha_tab_group.TabGroup;
+    //
+    Future<matcha_tab_group.TabGroup?> getOpenedTabGroup({
+      required Future<int?> idFuture,
+      required Future<matcha_tab_group.TabGroup> Function(int currentId)
+      contentCallback,
+    }) async {
+      //
+      final currentId = await idFuture;
+      if (currentId == null) {
+        return null;
       }
+
+      // id changed , close current tab group
+      if (currentId != sourceId) {
+        ref.read(tabGroupOpenedProvider.notifier).toggle(false);
+        return null;
+      }
+
+      // get latest TabGroup
+      final openedTabGroup = await contentCallback(currentId);
+
+      return openedTabGroup;
     }
 
-    return _selectedTabGroup;
+    switch (savedTabGroup.type) {
+      case TabsItemType.app:
+        final sessionIdFuture = ref.watch(selectedSessionIdProvider.future);
+
+        final openedTabGroup = await getOpenedTabGroup(
+          idFuture: sessionIdFuture,
+          contentCallback: (currentId) async {
+            final session = await ref.watch(sessionContentProvider(currentId).future);
+
+            return session.tabsItemList.firstWhere(
+                  (item) => item.id == savedTabGroup.id,
+                )
+                as matcha_tab_group.TabGroup;
+          },
+        );
+
+        return openedTabGroup;
+
+      case TabsItemType.browser:
+        final windowIdFuture = ref.watch(selectedWindowIdProvider.future);
+
+        final openedTabGroup = await getOpenedTabGroup(
+          idFuture: windowIdFuture,
+          contentCallback: (currentId) async {
+            final window = await ref.read(windowProvider(currentId).future);
+
+            return window.tabsItemList.firstWhere((item) => item.id == savedTabGroup.id)
+                as matcha_tab_group.TabGroup;
+          },
+        );
+
+        return openedTabGroup;
+    }
   }
 
-  void setSelected(matcha_tab_group.TabGroup tabGroup) {
-    _selectedTabGroup = tabGroup;
-    _tabGroupType = tabGroup.type;
+  Future<void> setSelected(matcha_tab_group.TabGroup tabGroup) async {
+    final sessionId = await ref.watch(selectedSessionIdProvider.future);
+    if (sessionId == null) {
+      throw Exception('No session selected');
+    }
 
-    state = AsyncData(_selectedTabGroup);
+    ref.read(tabGroupRepoProvider.notifier).save(tabGroup, sessionId);
+
+    ref.invalidateSelf();
   }
 
   void clearSelected() {
-    _selectedTabGroup = null;
-    _tabGroupType = null;
+    ref.read(tabGroupRepoProvider.notifier).clear();
 
-    state = AsyncData(_selectedTabGroup);
+    ref.invalidateSelf();
   }
 
   bool isSelected(matcha_tab_group.TabGroup tabGroup) {
-    return (_selectedTabGroup?.id == tabGroup.id) && (_tabGroupType == tabGroup.type);
+    final tabGroupRepoState = ref.read(tabGroupRepoProvider);
+    final savedTabGroup = tabGroupRepoState.tabGroup;
+
+    return (savedTabGroup?.id == tabGroup.id) && (savedTabGroup?.type == tabGroup.type);
   }
 
   TabsItemType? selectedBy() {
-    return _tabGroupType;
+    final tabGroupRepoState = ref.read(tabGroupRepoProvider);
+
+    return tabGroupRepoState.tabGroup?.type;
   }
 }
 

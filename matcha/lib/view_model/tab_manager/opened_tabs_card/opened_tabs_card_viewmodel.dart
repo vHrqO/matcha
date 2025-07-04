@@ -46,9 +46,7 @@ class WindowList extends _$WindowList {
     });
 
     //
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(windowId, TabsItemType.browser);
+
 
     ref.invalidateSelf();
   }
@@ -107,9 +105,7 @@ class Window extends _$Window {
     }
 
     //
-    await ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_window.id, TabsItemType.browser);
+
 
     ref.invalidateSelf();
   }

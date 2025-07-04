@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:matcha/repository/tab_group_repo.dart';
 
 import 'package:matcha/ui/views/home_view.dart';
 import 'package:matcha/view_model/shared/app_viewmodel.dart';
@@ -28,11 +29,13 @@ class _InitProvider extends ConsumerWidget {
     // By using "watch", the provider will stay alive and not be disposed.
     // and when use ref.invalidate ,a new state will be created.
     ref.watch(tabDbProvider);
+    ref.watch(tabGroupRepoProvider);
+
     ref.watch(rightSideOpenedProvider);
     ref.watch(tabGroupOpenedProvider);
+
     ref.watch(selectedTabsItemProvider);
     ref.watch(selectedTabGroupProvider);
-
     ref.watch(selectedSessionIdProvider);
     ref.watch(selectedWindowIdProvider);
 

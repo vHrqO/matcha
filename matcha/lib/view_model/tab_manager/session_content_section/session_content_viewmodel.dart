@@ -54,9 +54,6 @@ class SessionContent extends _$SessionContent {
 
     //
     ref.invalidateSelf();
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
   Future<void> addAllTabsItem(List<TabsItem> tabsItemList) async {
@@ -67,9 +64,6 @@ class SessionContent extends _$SessionContent {
 
     //
     ref.invalidateSelf();
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
   Future<void> removeTabsItem(TabsItem tabsItem) async {
@@ -77,9 +71,6 @@ class SessionContent extends _$SessionContent {
 
     //
     ref.invalidateSelf();
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
   Future<void> removeAllTabsItem(List<TabsItem> tabsItemList) async {
@@ -92,9 +83,6 @@ class SessionContent extends _$SessionContent {
 
     //
     ref.invalidateSelf();
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_session.id, TabsItemType.app);
   }
 
   Future<void> moveTabInGroup(matcha_tab.Tab tab, int groupId) async {
@@ -106,9 +94,6 @@ class SessionContent extends _$SessionContent {
 
     //
     ref.invalidateSelf();
-    ref
-        .read(selectedTabGroupProvider.notifier)
-        .dataHasChanged(_session.id, TabsItemType.app);
   }
 }
 
