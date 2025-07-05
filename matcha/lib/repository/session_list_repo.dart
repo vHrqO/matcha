@@ -85,6 +85,7 @@ class SessionListRepo extends _$SessionListRepo {
       }
     });
 
+    ref.invalidateSelf();
     link.close();
   }
 }
