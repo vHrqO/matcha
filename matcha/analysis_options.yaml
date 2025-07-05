@@ -28,6 +28,9 @@ linter:
 analyzer:
   plugins:
     - custom_lint
+  
+  exclude:
+    - "**/*.drift"
 
     
 # Additional information about this file can be found at
