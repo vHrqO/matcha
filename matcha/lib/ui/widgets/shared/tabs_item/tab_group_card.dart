@@ -8,6 +8,7 @@ import 'package:matcha/model/tabs_item/tab_group.dart' as matcha_tab_group;
 import 'package:matcha/ui/widgets/tab_manager/session_content_section/tabs_item_list_section/session_tab_tile.dart';
 import 'package:matcha/view_model/shared/app_viewmodel.dart';
 import 'package:matcha/view_model/tab_manager/session_content_section/session_content_viewmodel.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class TabGroupCard extends StatelessWidget {
   const TabGroupCard({
@@ -35,9 +36,18 @@ class TabGroupCard extends StatelessWidget {
             Divider(),
 
             Expanded(
-              child: TabList(
-                tabList: tabGroup.tabList,
-                hoverMenuBuilder: hoverMenuBuilder,
+              child: Skeleton.replace(
+                replacement: Column(
+                  children: [
+                    ListTile(title: Text("Tab example 1")),
+                    ListTile(title: Text("Tab example 2")),
+                  ],
+                ),
+
+                child: TabList(
+                  tabList: tabGroup.tabList,
+                  hoverMenuBuilder: hoverMenuBuilder,
+                ),
               ),
             ),
           ],
@@ -62,14 +72,16 @@ class TitleBar extends ConsumerWidget {
 
         Spacer(),
 
-        Tooltip(
-          message: "Close",
-          child: IconButton(
-            padding: const EdgeInsets.all(0.0),
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              ref.read(tabGroupOpenedProvider.notifier).toggle(false);
-            },
+        Skeleton.keep(
+          child: Tooltip(
+            message: "Close",
+            child: IconButton(
+              padding: const EdgeInsets.all(0.0),
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                ref.read(tabGroupOpenedProvider.notifier).toggle(false);
+              },
+            ),
           ),
         ),
       ],

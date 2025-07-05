@@ -44,6 +44,8 @@ class TabGroupSectionRx extends ConsumerWidget {
 
       default:
         return Skeletonizer(
+          ignorePointers: false,
+
           child: TabGroupCard(
             tabGroup: mockTabGroup,
             hoverMenuBuilder: (tab) {
