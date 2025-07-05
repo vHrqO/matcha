@@ -6,7 +6,8 @@ getAllSession: SELECT * FROM session ORDER BY position ASC;
 
 
 addSession: 
---sets position after the current maximum
+-- sets position after the current maximum
+-- '-1' for zero-based index
 INSERT INTO session (position, name)
 VALUES (
   (SELECT IFNULL(MAX(position), -1) + 1 FROM session),
@@ -35,7 +36,7 @@ UPDATE session
 
 ------reorderSession
 reorderSession_getSafeOffset:
-SELECT COALESCE(MAX(position), 0) + 1 AS safe_offset
+SELECT IFNULL(MAX(position), 0) + 1 AS safe_offset
 FROM session;
 
 -- push out of range
