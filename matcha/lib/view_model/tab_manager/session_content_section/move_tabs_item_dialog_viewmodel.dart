@@ -39,15 +39,24 @@ class MoveTabsItemForm extends _$MoveTabsItemForm {
     final tabsItemList = selectedList.values.toList();
     final idList = selectedList.keys.toList();
 
-    // remove from current session
-    await ref
-        .read(sessionContentProvider(_sessionId).notifier)
-        .removeAllTabsItem(tabsItemList);
+    for (var element in tabsItemList) {
+       await ref
+        .read(sessionContentProvider(sessionId).notifier)
+        .moveToSession(element, _moveToSessionId!);
+    }
 
-    // move to new session
-    await ref
-        .read(sessionContentProvider(_moveToSessionId!).notifier)
-        .addAllTabsItem(tabsItemList);
+
+   
+    // ------
+    // // remove from current session
+    // await ref
+    //     .read(sessionContentProvider(_sessionId).notifier)
+    //     .removeAllTabsItem(tabsItemList);
+
+    // // move to new session
+    // await ref
+    //     .read(sessionContentProvider(_moveToSessionId!).notifier)
+    //     .addAllTabsItem(tabsItemList);
 
     //
     ref.read(selectedTabsItemProvider.notifier).clearSelected();

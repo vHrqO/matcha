@@ -2,6 +2,8 @@ import 'package:matcha/model/session/session_meta.dart';
 import 'package:matcha/model/tabs_item/tab.dart' as matcha_tab;
 import 'package:matcha/repository/session_list_repo.dart';
 import 'package:matcha/repository/session_repo.dart';
+import 'package:matcha/repository/tab_group_repo.dart';
+import 'package:matcha/view_model/shared/app_viewmodel.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:matcha/mock_data/session.dart';
@@ -104,6 +106,51 @@ class SessionContent extends _$SessionContent {
     await ref
         .read(sessionRepoProvider(_sessionId).notifier)
         .moveTabInGroup(tab, groupId);
+
+    //
+    ref.invalidateSelf();
+  }
+
+  Future<void> moveTabOutGroup(matcha_tab.Tab tab, int groupId) async {
+    await future;
+
+    await ref
+        .read(sessionRepoProvider(_sessionId).notifier)
+        .moveTabOutGroup(tab, groupId);
+
+    //
+    ref.invalidateSelf();
+  }
+
+  Future<void> moveToSession(TabsItem tabsItem, int newSessionId) async {
+    await future;
+
+          ref.read(tabGroupOpenedProvider.notifier).toggle(false);
+
+      ref.read(tabGroupRepoProvider.notifier).clear();
+
+
+    await ref
+        .read(sessionRepoProvider(_sessionId).notifier)
+        .moveToSession(tabsItem, newSessionId);
+
+    //
+    ref.invalidateSelf();
+  }
+
+  Future<void> group(List<matcha_tab.Tab> tabs) async {
+    await future;
+
+    await ref.read(sessionRepoProvider(_sessionId).notifier).group(tabs);
+
+    //
+    ref.invalidateSelf();
+  }
+
+  Future<void> ungroup(matcha_tab_group.TabGroup tabGroup) async {
+    await future;
+
+    await ref.read(sessionRepoProvider(_sessionId).notifier).ungroup(tabGroup);
 
     //
     ref.invalidateSelf();

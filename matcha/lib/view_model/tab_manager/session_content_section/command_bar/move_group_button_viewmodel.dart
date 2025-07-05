@@ -68,24 +68,25 @@ class MoveToGroupButton extends _$MoveToGroupButton {
       }
     }).toList();
 
-    // to_do : wait - refactor selectedTabGroupProvider
-    // for (var element in toMoveTabs) {
-    //   await ref.read(sessionContentProvider(sessionId).notifier).moveTabInGroup(element, targetGroup.id);
-    // }
+    for (var element in toMoveTabs) {
+      await ref
+          .read(sessionContentProvider(sessionId).notifier)
+          .moveTabInGroup(element, targetGroup.id);
+    }
 
     //------------------------------------------
     // add to group
-    targetGroup.tabList.addAll(toMoveTabs);
+    // targetGroup.tabList.addAll(toMoveTabs);
 
-    // remove from session
-    await ref
-        .read(sessionContentProvider(sessionId).notifier)
-        .removeAllTabsItem(selectedTabsItem.values.toList());
+    // // remove from session
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .removeAllTabsItem(selectedTabsItem.values.toList());
 
-    // update  group
-    await ref
-        .read(sessionContentProvider(sessionId).notifier)
-        .updateTabsItem(targetGroup);
+    // // update  group
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .updateTabsItem(targetGroup);
 
     //-------------------------------------------
 
@@ -128,13 +129,17 @@ class MoveToGroupButtonTap extends _$MoveToGroupButtonTap {
     // add to group
     targetGroup.tabList.add(tab);
 
-    // remove from session
-    await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
-
-    // update  group
     await ref
         .read(sessionContentProvider(sessionId).notifier)
-        .updateTabsItem(targetGroup);
+        .moveTabInGroup(tab, targetGroup.id);
+    //---
+    // // remove from session
+    // await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
+
+    // // update  group
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .updateTabsItem(targetGroup);
 
     link.close();
   }
@@ -204,23 +209,31 @@ class MoveOutGroupButton extends _$MoveOutGroupButton {
       }
     }).toList();
 
-    // remove from group
-    targetGroup.tabList.removeWhere((tab) {
-      return idList.contains(tab.id);
-    });
-    await ref
-        .read(sessionContentProvider(sessionId).notifier)
-        .removeAllTabsItem(toMoveTabs);
+    for (var element in toMoveTabs) {
+      await ref
+          .read(sessionContentProvider(sessionId).notifier)
+          .moveTabOutGroup(element, targetGroup.id);
+    }
 
-    // update  group
-    await ref
-        .read(sessionContentProvider(sessionId).notifier)
-        .updateTabsItem(targetGroup);
+    ///------------------------------------------
 
-    // add to session
-    await ref
-        .read(sessionContentProvider(sessionId).notifier)
-        .addAllTabsItem(toMoveTabs);
+    // // remove from group
+    // targetGroup.tabList.removeWhere((tab) {
+    //   return idList.contains(tab.id);
+    // });
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .removeAllTabsItem(toMoveTabs);
+
+    // // update  group
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .updateTabsItem(targetGroup);
+
+    // // add to session
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .addAllTabsItem(toMoveTabs);
 
     ref.read(selectedTabsItemProvider.notifier).clearSelected();
   }
@@ -255,20 +268,25 @@ class MoveOutGroupButtonTap extends _$MoveOutGroupButtonTap {
       throw Exception('No target group selected');
     }
 
-    // reset groupId to null
-    tab.groupId = null;
-
-    // remove from group
-    targetGroup.tabList.remove(tab);
-    await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
-
-    // update  group
     await ref
         .read(sessionContentProvider(sessionId).notifier)
-        .updateTabsItem(targetGroup);
+        .moveTabOutGroup(tab, targetGroup.id);
+    // -------
 
-    // add to session
-    await ref.read(sessionContentProvider(sessionId).notifier).updateTabsItem(tab);
+    // // reset groupId to null
+    // tab.groupId = null;
+
+    // // remove from group
+    // targetGroup.tabList.remove(tab);
+    // await ref.read(sessionContentProvider(sessionId).notifier).removeTabsItem(tab);
+
+    // // update  group
+    // await ref
+    //     .read(sessionContentProvider(sessionId).notifier)
+    //     .updateTabsItem(targetGroup);
+
+    // // add to session
+    // await ref.read(sessionContentProvider(sessionId).notifier).updateTabsItem(tab);
 
     link.close();
   }

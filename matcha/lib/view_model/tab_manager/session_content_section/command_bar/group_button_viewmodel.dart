@@ -66,15 +66,19 @@ class GroupButton extends _$GroupButton {
         }).toList(),
       );
 
-      // remove tabs will be in new group
       await ref
           .read(sessionContentProvider(sessionId).notifier)
-          .removeAllTabsItem(selectedTabs.values.toList());
+          .group(newTabGroup.tabList);
+      //---
+      // // remove tabs will be in new group
+      // await ref
+      //     .read(sessionContentProvider(sessionId).notifier)
+      //     .removeAllTabsItem(selectedTabs.values.toList());
 
-      // add new tab group to session
-      await ref
-          .read(sessionContentProvider(sessionId).notifier)
-          .updateTabsItem(newTabGroup);
+      // // add new tab group to session
+      // await ref
+      //     .read(sessionContentProvider(sessionId).notifier)
+      //     .updateTabsItem(newTabGroup);
 
       ref.read(selectedTabsItemProvider.notifier).clearSelected();
       return;
@@ -88,21 +92,27 @@ class GroupButton extends _$GroupButton {
       final tabGroup = selectedTabGroup;
       final tabList = selectedTabGroup.tabList;
 
-      // remove group
-      ref.invalidate(tabGroupOpenedProvider);
-      await ref
-          .read(sessionContentProvider(sessionId).notifier)
-          .removeTabsItem(tabGroup);
 
-      // remove groupId
-      for (final tab in selectedTabGroup.tabList) {
-        tab.groupId = null;
-      }
+      ref.read(tabGroupOpenedProvider.notifier).toggle(false);
+      ref.read(selectedTabGroupProvider.notifier).clearSelected();
+      await ref.read(sessionContentProvider(sessionId).notifier).ungroup(tabGroup);
+      
+      // -----
+      // // remove group
+      // ref.invalidate(tabGroupOpenedProvider);
+      // await ref
+      //     .read(sessionContentProvider(sessionId).notifier)
+      //     .removeTabsItem(tabGroup);
 
-      // add tabs to session
-      await ref
-          .read(sessionContentProvider(sessionId).notifier)
-          .addAllTabsItem(tabList);
+      // // remove groupId
+      // for (final tab in selectedTabGroup.tabList) {
+      //   tab.groupId = null;
+      // }
+
+      // // add tabs to session
+      // await ref
+      //     .read(sessionContentProvider(sessionId).notifier)
+      //     .addAllTabsItem(tabList);
 
       ref.read(selectedTabsItemProvider.notifier).clearSelected();
       return;

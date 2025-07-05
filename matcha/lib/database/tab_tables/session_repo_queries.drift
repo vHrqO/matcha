@@ -6,6 +6,16 @@ getLatestAddId: SELECT last_insert_rowid() AS latest_add_id;
 
 getSessionName: SELECT name FROM session WHERE id = :id;
 
+getSessionId:
+SELECT session_id
+FROM tabs_item
+WHERE id = :tabsItemId;
+
+getGroupId:
+SELECT group_id
+FROM tab
+WHERE id = :tabsItemId;
+
 ------ TabsItem
 hasTabsItem:
 SELECT EXISTS (
@@ -162,8 +172,9 @@ SELECT DISTINCT tag FROM tabs_item_tag;
 ------
 
 
------- reorder
-reorderRemoveTabsItem_out:
+------ reorder 
+--
+refreshPositionTabsItemOut:
   WITH Ordered AS (
     SELECT
       tabs_item.id,
@@ -183,7 +194,7 @@ reorderRemoveTabsItem_out:
   )
   WHERE tabs_item.id IN (SELECT id FROM Ordered);
 
-reorderRemoveTabsItem_in:
+refreshPositionTabsItemIn:
   WITH Ordered AS (
     SELECT
       id,
@@ -275,7 +286,7 @@ WHERE id = :tabsItemId;
 
 
 
-moveTabOutGroup:
+moveTabOutGroup_part1:
 UPDATE tab
 SET
   group_id = NULL,
@@ -283,5 +294,57 @@ SET
 WHERE id = :tabsItemId;
 
 
+moveTabOutGroup_part2:
+UPDATE
+  tabs_item
+SET
+  is_inside_group = FALSE,
+  position = (
+    SELECT
+      COUNT(*)
+    FROM
+      tabs_item
+    WHERE
+      session_id = :sessionId
+      AND is_inside_group = FALSE
+  )
+WHERE
+  id = :tabsItemId;
+
+
+moveToSession:
+UPDATE tabs_item
+SET
+  session_id = :newSessionId,
+  position = (
+    SELECT IFNULL(MAX(position), -1) + 1
+    FROM tabs_item
+    WHERE session_id = :newSessionId
+      AND is_inside_group = FALSE
+  )
+WHERE id = :tabsItemId;
+
+
+moveTabInGroupToSession:
+UPDATE tabs_item
+SET
+  session_id = :newSessionId
+WHERE id IN (
+  SELECT id FROM tab WHERE group_id = :groupId
+);
+
+
+
+
+-- UPDATE tabs_item
+-- SET
+--   is_inside_group = FALSE,
+--   position = (
+--     SELECT IFNULL(MAX(position), -1) + 1
+--     FROM tabs_item
+--     WHERE session_id = (SELECT session_id FROM tabs_item WHERE id = :tabsItemId)
+--       AND is_inside_group = FALSE
+--   )
+-- WHERE id = :tabsItemId;
 
 

@@ -218,16 +218,17 @@ class SessionRepo extends _$SessionRepo {
   Future<void> removeTabsItem(TabsItem tabsItem) async {
     final link = ref.keepAlive();
 
-    final appDb = ref.read(tabDbProvider);
+    final tabDb = ref.read(tabDbProvider);
     final inGroup = tabsItem is matcha_tab.Tab && tabsItem.groupId != null;
+    final sessionId = await tabDb.getSessionId(tabsItem.id).getSingle();
 
-    await appDb.transaction(() async {
-      await appDb.removeTabsItem(tabsItem.id);
+    await tabDb.transaction(() async {
+      await tabDb.removeTabsItem(tabsItem.id);
 
       if (inGroup) {
-        await appDb.reorderRemoveTabsItem_in(tabsItem.id);
+        await tabDb.refreshPositionTabsItemIn(tabsItem.id);
       } else {
-        await appDb.reorderRemoveTabsItem_out(tabsItem.id);
+        await tabDb.refreshPositionTabsItemOut(sessionId);
       }
     });
 
@@ -235,43 +236,117 @@ class SessionRepo extends _$SessionRepo {
     link.close();
   }
 
-
-  Future<void> moveTabInGroup(matcha_tab.Tab tab , int groupId) async {
+  Future<void> moveTabInGroup(matcha_tab.Tab tab, int groupId) async {
     final link = ref.keepAlive();
 
     final tabDb = ref.read(tabDbProvider);
     final inGroup = tab.groupId != null;
+    final sessionId = await tabDb.getSessionId(tab.id).getSingle();
 
     await tabDb.transaction(() async {
       await tabDb.moveTabInGroup_part1(groupId, tab.id);
       await tabDb.moveTabInGroup_part2(tab.id);
 
-
-
-
-      // // Add TabsItem
-      // await tabDb.addTabsItem(_sessionId, inGroup, false, tab.title);
-      // final newItemId = await tabDb.getLatestAddId().getSingle();
-
-      // // Add Tab
-      // if (inGroup) {
-      //   await tabDb.addTabInGroup(newItemId, tab.groupId, tab.url);
-      // } else {
-      //   await tabDb.addTab(newItemId, tab.url);
-      // }
-
-      // // Add Tags
-      // for (final tag in tab.tagList) {
-      //   await tabDb.addTag(newItemId, tag);
-      // }
+      await tabDb.refreshPositionTabsItemOut(sessionId);
     });
 
     ref.invalidateSelf();
     link.close();
   }
 
-  //move to session
+  Future<void> moveTabOutGroup(matcha_tab.Tab tab, int groupId) async {
+    final link = ref.keepAlive();
 
+    final tabDb = ref.read(tabDbProvider);
+    final inGroup = tab.groupId != null;
+    final sessionId = await tabDb.getSessionId(tab.id).getSingle();
+
+    await tabDb.transaction(() async {
+      await tabDb.moveTabOutGroup_part1(tab.id);
+      await tabDb.moveTabOutGroup_part2(sessionId, tab.id);
+
+      await tabDb.refreshPositionTabsItemIn(groupId);
+    });
+
+    ref.invalidateSelf();
+    link.close();
+  }
+
+  Future<void> moveToSession(TabsItem tabsItem, int newSessionId) async {
+    final link = ref.keepAlive();
+
+    final tabDb = ref.read(tabDbProvider);
+    final inGroup = (tabsItem is matcha_tab.Tab) && (tabsItem.groupId != null);
+    final isGroup = tabsItem is matcha_tab_group.TabGroup;
+    final sessionId = await tabDb.getSessionId(tabsItem.id).getSingle();
+    // final groupId = await tabDb.getGroupId(tabsItem.id).getSingle();
+
+    await tabDb.transaction(() async {
+      await tabDb.moveToSession(newSessionId, tabsItem.id);
+
+      if (isGroup) {
+        await tabDb.moveTabInGroupToSession(newSessionId, tabsItem.id);
+      } 
+
+      if (inGroup) {
+        await tabDb.refreshPositionTabsItemIn(tabsItem.groupId);
+      } else {
+        await tabDb.refreshPositionTabsItemOut(sessionId);
+      }
+    });
+
+    ref.invalidateSelf();
+    link.close();
+  }
+
+  Future<void> group(List<matcha_tab.Tab> tabs) async {
+    final link = ref.keepAlive();
+
+    final tabDb = ref.read(tabDbProvider);
+
+    await tabDb.transaction(() async {
+      // Add TabsItem
+      await tabDb.addTabsItem(_sessionId, false, true, "New TabGroup");
+      final newItemId = await tabDb.getLatestAddId().getSingle();
+
+      // Add TabGroup
+      await tabDb.addTabGroup(newItemId, "grey");
+      final groupId = await tabDb.getLatestAddId().getSingle();
+
+      // Move TabsItem to Group
+      for (final tab in tabs) {
+        await tabDb.moveTabInGroup_part1(groupId, tab.id);
+        await tabDb.moveTabInGroup_part2(tab.id);
+      }
+
+      //
+      await tabDb.refreshPositionTabsItemOut(_sessionId);
+    });
+
+    ref.invalidateSelf();
+    link.close();
+  }
+
+  Future<void> ungroup(matcha_tab_group.TabGroup tabGroup) async {
+    final link = ref.keepAlive();
+
+    final tabDb = ref.read(tabDbProvider);
+
+    await tabDb.transaction(() async {
+      // Move TabsItem out
+      for (final tab in tabGroup.tabList) {
+        await tabDb.moveTabOutGroup_part1(tab.id);
+        await tabDb.moveTabOutGroup_part2(_sessionId, tab.id);
+      }
+
+      //
+      await tabDb.removeTabsItem(tabGroup.id);
+      await tabDb.refreshPositionTabsItemOut(_sessionId);
+    });
+
+    ref.invalidateSelf();
+    link.close();
+  }
 }
 
 @riverpod
