@@ -189,7 +189,7 @@ class SelectedTabGroup extends _$SelectedTabGroup {
     //
     Future<matcha_tab_group.TabGroup?> getOpenedTabGroup({
       required Future<int?> idFuture,
-      required Future<matcha_tab_group.TabGroup> Function(int currentId)
+      required Future<matcha_tab_group.TabGroup?> Function(int currentId)
       contentCallback,
     }) async {
       //
@@ -219,10 +219,15 @@ class SelectedTabGroup extends _$SelectedTabGroup {
           contentCallback: (currentId) async {
             final session = await ref.watch(sessionContentProvider(currentId).future);
 
-            return session.tabsItemList.firstWhere(
-                  (item) => item.id == savedTabGroup.id,
-                )
-                as matcha_tab_group.TabGroup;
+            try {
+              return session.tabsItemList.firstWhere(
+                    (item) => item.id == savedTabGroup.id,
+                  )
+                  as matcha_tab_group.TabGroup;
+            } on StateError catch (e) {
+              print('TabGroup not found in session: $e');
+              return null;
+            }
           },
         );
 
@@ -236,8 +241,15 @@ class SelectedTabGroup extends _$SelectedTabGroup {
           contentCallback: (currentId) async {
             final window = await ref.read(windowProvider(currentId).future);
 
-            return window.tabsItemList.firstWhere((item) => item.id == savedTabGroup.id)
-                as matcha_tab_group.TabGroup;
+            try {
+              return window.tabsItemList.firstWhere(
+                    (item) => item.id == savedTabGroup.id,
+                  )
+                  as matcha_tab_group.TabGroup;
+            } on StateError catch (e) {
+              print('TabGroup not found in window: $e');
+              return null;
+            }
           },
         );
 
