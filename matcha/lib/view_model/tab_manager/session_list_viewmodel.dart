@@ -20,11 +20,13 @@ class SessionList extends _$SessionList {
   }
 
   Future<void> delete(int sessionId) async {
-    await ref.read(sessionListRepoProvider.notifier).delete(sessionId);
+    await ref.read(sessionListRepoProvider.notifier).remove(sessionId);
   }
 
-  Future<void> reorder(int oldIndex, int newIndex) async {
-    await ref.read(sessionListRepoProvider.notifier).reorder(oldIndex, newIndex);
+  Future<void> reorder({required int oldIndex, required int newIndex}) async {
+    await ref
+        .read(sessionListRepoProvider.notifier)
+        .reorder(oldIndex: oldIndex, newIndex: newIndex);
   }
 }
 

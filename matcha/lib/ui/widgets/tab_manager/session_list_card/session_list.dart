@@ -87,11 +87,14 @@ class _SessionsListState extends ConsumerState<SessionList> {
           if (oldIndex < newIndex) {
             newIndex -= 1;
           }
+
           final item = widget.sessionList.removeAt(oldIndex);
           widget.sessionList.insert(newIndex, item);
         });
 
-        await ref.read(sessionListProvider.notifier).reorder(oldIndex, newIndex);
+        await ref
+            .read(sessionListProvider.notifier)
+            .reorder(oldIndex: oldIndex, newIndex: newIndex);
       },
     );
   }

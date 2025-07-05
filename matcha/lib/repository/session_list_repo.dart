@@ -49,30 +49,40 @@ class SessionListRepo extends _$SessionListRepo {
     link.close();
   }
 
-  Future<void> delete(int id) async {
+  Future<void> remove(int id) async {
     final link = ref.keepAlive();
 
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      await tabDb.deleteSession_part1(id);
+      await tabDb.removeSession(id);
 
-      await tabDb.deleteSession_part2();
+      await tabDb.refreshPositionSession();
     });
 
     ref.invalidateSelf();
     link.close();
   }
 
-  Future<void> reorder(int oldIndex, int newIndex) async {
+  Future<void> reorder({required int oldIndex, required int newIndex}) async {
     final link = ref.keepAlive();
+
+    if (oldIndex == newIndex) {
+      throw ArgumentError('oldIndex and newIndex cannot be the same');
+    }
 
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      await tabDb.reorderSession_part1(oldIndex);
-      await tabDb.reorderSession_part2(oldIndex, newIndex);
-      await tabDb.reorderSession_part3(newIndex);
+      final safeOffset = await tabDb.reorderSession_getSafeOffset().getSingle();
+
+      await tabDb.reorderSession_addOffset(safeOffset, oldIndex, newIndex);
+
+      if (oldIndex < newIndex) {
+        await tabDb.reorderSession_shiftDownAndBack(safeOffset, oldIndex, newIndex);
+      } else if (oldIndex > newIndex) {
+        await tabDb.reorderSession_shiftUpAndBack(safeOffset, oldIndex, newIndex);
+      }
     });
 
     link.close();
