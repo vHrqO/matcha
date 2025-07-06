@@ -1,6 +1,6 @@
 CREATE TABLE session (
     id INTEGER PRIMARY KEY,
-    position INTEGER NOT NULL UNIQUE,
+    position INTEGER NOT NULL ,
 
     name TEXT NOT NULL
 );
@@ -16,7 +16,7 @@ CREATE TABLE tabs_item (
     title TEXT NOT NULL,
 
     FOREIGN KEY (session_id) REFERENCES session(id) ON DELETE CASCADE,
-    UNIQUE (session_id, position),
+
     CHECK (
         -- If inside group, position must be NULL
         -- If not inside group, must have position
@@ -45,7 +45,7 @@ CREATE TABLE tab (
     FOREIGN KEY (id) REFERENCES tabs_item(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES tab_group(id) ON DELETE CASCADE,
 
-    UNIQUE (group_id, position),
+
     CHECK (
         -- If in group, must have position
         -- If not in group, position must be NULL
