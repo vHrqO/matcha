@@ -25,3 +25,17 @@ class AnimationSettings {
   static const duration = Duration(milliseconds: 300);
   static const curve = Curves.easeInOutCubic;
 }
+
+/// Preferences key
+class PrefsKey {
+  static const String firstTimeRun = "first_time_run";
+
+  static const String themeMode = "theme_mode";
+}
+
+/// Preferences default value
+class PrefsValueDefault {
+  static const bool firstTimeRun = false;
+
+  static const String themeMode = "dark";
+}
