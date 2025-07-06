@@ -1,8 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-//
-import 'package:matcha/database/database.dart' as database;
-
 part 'app_viewmodel.g.dart';
 
 @riverpod
@@ -46,5 +43,3 @@ class TabGroupOpened extends _$TabGroupOpened {
     state = _isOpen;
   }
 }
-
-
