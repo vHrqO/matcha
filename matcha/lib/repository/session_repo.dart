@@ -21,9 +21,11 @@ class SessionRepo extends _$SessionRepo {
     final tabDb = ref.watch(tabDbProvider);
 
     final List<TabsItem> data = [];
-    final sessionName = await tabDb.getSessionName(_sessionId).getSingle();
+    final sessionName = await tabDb.getSessionName(sessionId: _sessionId).getSingle();
 
-    final outGroupTabsItems = await tabDb.getAllOutGroupTabsItems(_sessionId).get();
+    final outGroupTabsItems = await tabDb
+        .getAllOutGroupTabsItems(sessionId: _sessionId)
+        .get();
     for (final element in outGroupTabsItems) {
       if (element.isGroup) {
         // add group
@@ -32,7 +34,7 @@ class SessionRepo extends _$SessionRepo {
         final List<matcha_tab.Tab> tabList = [];
 
         final tabsItemsInGroup = await tabDb
-            .getAllInGroupTabsItems(_sessionId, element.id)
+            .getAllInGroupTabsItems(sessionId: _sessionId, groupId: element.id)
             .get();
         for (final tabElement in tabsItemsInGroup) {
           final tab = matcha_tab.Tab(
@@ -79,7 +81,7 @@ class SessionRepo extends _$SessionRepo {
     final link = ref.keepAlive();
 
     final tabDb = ref.read(tabDbProvider);
-    final exists = await tabDb.hasTabsItem(tabsItem.id).getSingle();
+    final exists = await tabDb.hasTabsItem(tabsItemId: tabsItem.id).getSingle();
 
     link.close();
     return exists;
@@ -89,25 +91,25 @@ class SessionRepo extends _$SessionRepo {
     final link = ref.keepAlive();
 
     final tabDb = ref.read(tabDbProvider);
-    final savedAllTags = await tabDb.getAllTags(tab.id).get();
+    final savedAllTags = await tabDb.getAllTags(tabsItemId: tab.id).get();
 
     await tabDb.transaction(() async {
       // update TabsItem
-      await tabDb.updateTabsItem(tab.title, tab.id);
+      await tabDb.updateTabsItem(title: tab.title, tabsItemId: tab.id);
 
       // update Tab
-      await tabDb.updateTab(tab.url, tab.id);
+      await tabDb.updateTab(url: tab.url, tabsItemId: tab.id);
 
       // update Tags
       for (final tag in savedAllTags) {
         if (!tab.tagList.contains(tag)) {
-          await tabDb.removeTag(tab.id, tag);
+          await tabDb.removeTag(tabsItemId: tab.id, tag: tag);
         }
       }
 
       for (final tag in tab.tagList) {
         if (!savedAllTags.contains(tag)) {
-          await tabDb.addTag(tab.id, tag);
+          await tabDb.addTag(tabsItemId: tab.id, tag: tag);
         }
       }
     });
@@ -120,14 +122,17 @@ class SessionRepo extends _$SessionRepo {
     final link = ref.keepAlive();
 
     final tabDb = ref.read(tabDbProvider);
-    final savedAllTags = await tabDb.getAllTags(tabGroup.id).get();
+    final savedAllTags = await tabDb.getAllTags(tabsItemId: tabGroup.id).get();
 
     await tabDb.transaction(() async {
       // update TabsItem
-      await tabDb.updateTabsItem(tabGroup.title, tabGroup.id);
+      await tabDb.updateTabsItem(title: tabGroup.title, tabsItemId: tabGroup.id);
 
       // update TabGroup
-      await tabDb.updateTabGroup(tabGroup.title, tabGroup.id);
+      await tabDb.updateTabGroup(
+        groupId: tabGroup.id,
+        groupColor: "grey", // to_do: make it dynamic , tabGroup.groupColor
+      );
 
       // update Tabs in Group
       for (final tab in tabGroup.tabList) {
@@ -139,13 +144,13 @@ class SessionRepo extends _$SessionRepo {
       // update Tags
       for (final tag in savedAllTags) {
         if (!tabGroup.tagList.contains(tag)) {
-          await tabDb.removeTag(tabGroup.id, tag);
+          await tabDb.removeTag(tabsItemId: tabGroup.id, tag: tag);
         }
       }
 
       for (final tag in tabGroup.tagList) {
         if (!savedAllTags.contains(tag)) {
-          await tabDb.addTag(tabGroup.id, tag);
+          await tabDb.addTag(tabsItemId: tabGroup.id, tag: tag);
         }
       }
     });
@@ -165,19 +170,28 @@ class SessionRepo extends _$SessionRepo {
 
     await tabDb.transaction(() async {
       // Add TabsItem
-      await tabDb.addTabsItem(_sessionId, inGroup, false, tab.title);
+      await tabDb.addTabsItem(
+        sessionId: _sessionId,
+        isInsideGroup: inGroup,
+        isGroup: false,
+        title: tab.title,
+      );
       final newItemId = await tabDb.getLatestAddId().getSingle();
 
       // Add Tab
       if (inGroup) {
-        await tabDb.addTabInGroup(newItemId, tab.groupId, tab.url);
+        await tabDb.addTabInGroup(
+          tabsItemId: newItemId,
+          groupId: tab.groupId,
+          url: tab.url,
+        );
       } else {
-        await tabDb.addTab(newItemId, tab.url);
+        await tabDb.addTab(tabsItemId: newItemId, url: tab.url);
       }
 
       // Add Tags
       for (final tag in tab.tagList) {
-        await tabDb.addTag(newItemId, tag);
+        await tabDb.addTag(tabsItemId: newItemId, tag: tag);
       }
     });
 
@@ -194,11 +208,16 @@ class SessionRepo extends _$SessionRepo {
 
     await tabDb.transaction(() async {
       // Add TabsItem
-      await tabDb.addTabsItem(_sessionId, false, true, tabGroup.title);
+      await tabDb.addTabsItem(
+        sessionId: _sessionId,
+        isInsideGroup: false,
+        isGroup: true,
+        title: tabGroup.title,
+      );
       final newItemId = await tabDb.getLatestAddId().getSingle();
 
       // Add TabGroup
-      await tabDb.addTabGroup(newItemId, "grey");
+      await tabDb.addTabGroup(tabsItemId: newItemId, groupColor: "grey");
       final groupId = await tabDb.getLatestAddId().getSingle();
 
       // Add Tabs in Group
@@ -209,7 +228,7 @@ class SessionRepo extends _$SessionRepo {
 
       // Add Tags
       for (final tag in tabGroup.tagList) {
-        await tabDb.addTag(newItemId, tag);
+        await tabDb.addTag(tabsItemId: newItemId, tag: tag);
       }
     });
 
@@ -226,12 +245,12 @@ class SessionRepo extends _$SessionRepo {
     final inGroup = tabsItem is matcha_tab.Tab && tabsItem.groupId != null;
 
     await tabDb.transaction(() async {
-      await tabDb.removeTabsItem(tabsItem.id);
+      await tabDb.removeTabsItem(tabsItemId: tabsItem.id);
 
       if (inGroup) {
-        await tabDb.refreshPositionTabInGroup(tabsItem.groupId);
+        await tabDb.refreshPositionTabInGroup(groupId: tabsItem.groupId!);
       } else {
-        await tabDb.refreshPositionTabsItem(_sessionId);
+        await tabDb.refreshPositionTabsItem(sessionId: _sessionId);
       }
     });
 
@@ -247,11 +266,11 @@ class SessionRepo extends _$SessionRepo {
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      await tabDb.moveTabInGroup_removeFromOut(tab.id);
+      await tabDb.moveTabInGroup_removeFromOut(tabsItemId: tab.id);
 
-      await tabDb.moveTabInGroup_AddToGroup(groupId, tab.id);
+      await tabDb.moveTabInGroup_AddToGroup(groupId: groupId, tabsItemId: tab.id);
 
-      await tabDb.refreshPositionTabsItem(_sessionId);
+      await tabDb.refreshPositionTabsItem(sessionId: _sessionId);
     });
 
     ref.invalidateSelf();
@@ -266,11 +285,11 @@ class SessionRepo extends _$SessionRepo {
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      await tabDb.moveTabOutGroup_removeFromGroup(tab.id);
+      await tabDb.moveTabOutGroup_removeFromGroup(tabsItemId: tab.id);
 
-      await tabDb.moveTabOutGroup_AddToOut(_sessionId, tab.id);
+      await tabDb.moveTabOutGroup_AddToOut(sessionId: _sessionId, tabsItemId: tab.id);
 
-      await tabDb.refreshPositionTabInGroup(groupId);
+      await tabDb.refreshPositionTabInGroup(groupId: groupId);
     });
 
     ref.invalidateSelf();
@@ -287,16 +306,19 @@ class SessionRepo extends _$SessionRepo {
     final isGroup = tabsItem is matcha_tab_group.TabGroup;
 
     await tabDb.transaction(() async {
-      await tabDb.moveToSession(newSessionId, tabsItem.id);
+      await tabDb.moveToSession(newSessionId: newSessionId, tabsItemId: tabsItem.id);
 
       if (isGroup) {
-        await tabDb.moveToSession_TabInGroup(newSessionId, tabsItem.id);
+        await tabDb.moveToSession_TabInGroup(
+          newSessionId: newSessionId,
+          groupId: tabsItem.id,
+        );
       }
 
       if (inGroup) {
-        await tabDb.refreshPositionTabInGroup(tabsItem.groupId);
+        await tabDb.refreshPositionTabInGroup(groupId: tabsItem.groupId!);
       } else {
-        await tabDb.refreshPositionTabsItem(_sessionId);
+        await tabDb.refreshPositionTabsItem(sessionId: _sessionId);
       }
     });
 
@@ -313,21 +335,26 @@ class SessionRepo extends _$SessionRepo {
 
     await tabDb.transaction(() async {
       // Add TabsItem
-      await tabDb.addTabsItem(_sessionId, false, true, "New TabGroup");
+      await tabDb.addTabsItem(
+        sessionId: _sessionId,
+        isInsideGroup: false,
+        isGroup: true,
+        title: "New TabGroup",
+      );
       final newItemId = await tabDb.getLatestAddId().getSingle();
 
       // Add TabGroup
-      await tabDb.addTabGroup(newItemId, "grey");
+      await tabDb.addTabGroup(tabsItemId: newItemId, groupColor: "grey");
       final groupId = await tabDb.getLatestAddId().getSingle();
 
       // Move TabsItem to Group
       for (final tab in tabs) {
-        await tabDb.moveTabInGroup_removeFromOut(tab.id);
-        await tabDb.moveTabInGroup_AddToGroup(groupId, tab.id);
+        await tabDb.moveTabInGroup_removeFromOut(tabsItemId: tab.id);
+        await tabDb.moveTabInGroup_AddToGroup(groupId: groupId, tabsItemId: tab.id);
       }
 
       //
-      await tabDb.refreshPositionTabsItem(_sessionId);
+      await tabDb.refreshPositionTabsItem(sessionId: _sessionId);
     });
 
     ref.invalidateSelf();
@@ -344,14 +371,14 @@ class SessionRepo extends _$SessionRepo {
     await tabDb.transaction(() async {
       // Move TabsItem out
       for (final tab in tabGroup.tabList) {
-        await tabDb.moveTabOutGroup_removeFromGroup(tab.id);
-        await tabDb.moveTabOutGroup_AddToOut(_sessionId, tab.id);
+        await tabDb.moveTabOutGroup_removeFromGroup(tabsItemId: tab.id);
+        await tabDb.moveTabOutGroup_AddToOut(sessionId: _sessionId, tabsItemId: tab.id);
       }
 
       // Remove TabGroup
-      await tabDb.removeTabsItem(tabGroup.id);
+      await tabDb.removeTabsItem(tabsItemId: tabGroup.id);
 
-      await tabDb.refreshPositionTabsItem(_sessionId);
+      await tabDb.refreshPositionTabsItem(sessionId: _sessionId);
     });
 
     ref.invalidateSelf();
@@ -381,15 +408,25 @@ class SessionOrderRepo extends _$SessionOrderRepo {
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {
-        await tabDb.reorderTabsItem_shiftDown(oldIndex, newIndex, sessionId);
+        await tabDb.reorderTabsItem_shiftDown(
+          oldIndex: oldIndex,
+          newIndex: newIndex,
+          sessionId: sessionId,
+        );
       } else if (oldIndex > newIndex) {
-        await tabDb.reorderTabsItem_shiftUp(oldIndex, newIndex, sessionId);
+        await tabDb.reorderTabsItem_shiftUp(
+          oldIndex: oldIndex,
+          newIndex: newIndex,
+          sessionId: sessionId,
+        );
       }
 
-      final isUnique = await tabDb.isTabsItemPositionUnique(sessionId).getSingle();
+      final isUnique = await tabDb
+          .isTabsItemPositionUnique(sessionId: sessionId)
+          .getSingle();
       if (!isUnique) {
         print("tabs_item.position is not unique, refreshing positions");
-        await tabDb.refreshPositionTabsItem(sessionId);
+        await tabDb.refreshPositionTabsItem(sessionId: sessionId);
       }
     });
 
@@ -412,15 +449,25 @@ class SessionOrderRepo extends _$SessionOrderRepo {
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {
-        await tabDb.reorderTabIn_shiftDown(oldIndex, newIndex, groupId);
+        await tabDb.reorderTabIn_shiftDown(
+          oldIndex: oldIndex,
+          newIndex: newIndex,
+          groupId: groupId,
+        );
       } else if (oldIndex > newIndex) {
-        await tabDb.reorderTabIn_shiftUp(oldIndex, newIndex, groupId);
+        await tabDb.reorderTabIn_shiftUp(
+          oldIndex: oldIndex,
+          newIndex: newIndex,
+          groupId: groupId,
+        );
       }
 
-      final isUnique = await tabDb.isTabInGroupPositionUnique(groupId).getSingle();
+      final isUnique = await tabDb
+          .isTabInGroupPositionUnique(groupId: groupId)
+          .getSingle();
       if (!isUnique) {
         print("tab.position is not unique, refreshing positions");
-        await tabDb.refreshPositionTabInGroup(groupId);
+        await tabDb.refreshPositionTabInGroup(groupId: groupId);
       }
     });
 

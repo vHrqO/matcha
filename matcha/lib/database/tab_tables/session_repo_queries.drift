@@ -215,7 +215,7 @@ WHERE session_id = :sessionId
   AND is_inside_group = FALSE;
 
 
-refreshPositionTabInGroup:
+refreshPositionTabInGroup(:groupId AS INTEGER):
 WITH Ordered AS (
   SELECT
     id,
@@ -321,7 +321,7 @@ SET
     is_inside_group = TRUE
 WHERE id = :tabsItemId;
 
-moveTabInGroup_AddToGroup:
+moveTabInGroup_AddToGroup(:groupId AS INTEGER):
 UPDATE tab
 SET
   group_id = :groupId,

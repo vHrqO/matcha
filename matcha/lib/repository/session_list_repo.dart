@@ -32,7 +32,7 @@ class SessionListRepo extends _$SessionListRepo {
 
     final tabDb = ref.read(tabDbProvider);
 
-    await tabDb.addSession(name);
+    await tabDb.addSession(name: name);
 
     ref.invalidateSelf();
     link.close();
@@ -43,7 +43,7 @@ class SessionListRepo extends _$SessionListRepo {
 
     final tabDb = ref.read(tabDbProvider);
 
-    await tabDb.updateSession(sessionMeta.name, sessionMeta.id);
+    await tabDb.updateSession(name: sessionMeta.name, id: sessionMeta.id);
 
     ref.invalidateSelf();
     link.close();
@@ -55,7 +55,7 @@ class SessionListRepo extends _$SessionListRepo {
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      await tabDb.removeSession(id);
+      await tabDb.removeSession(id: id);
 
       await tabDb.refreshPositionSession();
     });
@@ -75,9 +75,9 @@ class SessionListRepo extends _$SessionListRepo {
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {
-        await tabDb.reorderSession_shiftDown(oldIndex, newIndex);
+        await tabDb.reorderSession_shiftDown(oldIndex: oldIndex, newIndex: newIndex);
       } else if (oldIndex > newIndex) {
-        await tabDb.reorderSession_shiftUp(oldIndex, newIndex);
+        await tabDb.reorderSession_shiftUp(oldIndex: oldIndex, newIndex: newIndex);
       }
 
       final isUnique = await tabDb.isSessionPositionUnique().getSingle();
