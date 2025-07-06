@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matcha/repository/tab_group_repo.dart';
 
 import 'package:matcha/ui/views/home_view.dart';
+import 'package:matcha/view_model/settings/appearance_viewmodel.dart';
 import 'package:matcha/view_model/shared/app_viewmodel.dart';
 import 'package:matcha/view_model/shared/database_viewmodel.dart';
 import 'package:matcha/view_model/shared/selected_viewmodel.dart';
@@ -44,18 +45,23 @@ class _InitProvider extends ConsumerWidget {
   }
 }
 
-class AppWidget extends StatelessWidget {
+class AppWidget extends ConsumerWidget {
   const AppWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeModeAsync = ref.watch(appThemeModeProvider);
+
     return MaterialApp(
       title: 'Matcha',
 
       // remove debug Banner
       debugShowCheckedModeBanner: false,
 
-      themeMode: ThemeMode.dark,
+      themeMode: switch (themeModeAsync) {
+        AsyncData(value: final themeMode) => themeMode,
+        _ => ThemeMode.system,
+      },
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
