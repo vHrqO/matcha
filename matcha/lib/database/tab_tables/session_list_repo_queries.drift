@@ -35,43 +35,36 @@ UPDATE session
 
 
 ------reorderSession
-reorderSession_getSafeOffset:
-SELECT IFNULL(MAX(position), 0) + 1 AS safe_offset
-FROM session;
-
--- push out of range
-reorderSession_addOffset(:offset AS INTEGER, :oldIndex AS INTEGER, :newIndex AS INTEGER):
-UPDATE session
-  SET position = position + :offset
-WHERE
-  position >= MIN(:oldIndex, :newIndex)
-  AND position <= MAX(:oldIndex, :newIndex);
+isSessionPositionUnique: 
+SELECT NOT EXISTS (
+  SELECT 1
+  FROM session
+  GROUP BY position
+  HAVING COUNT(*) > 1
+) AS is_unique;
 
 -- moving down (old < new)
-reorderSession_shiftDownAndBack(:offset AS INTEGER, :oldIndex AS INTEGER, :newIndex AS INTEGER):
+reorderSession_shiftDown:
 UPDATE session
   SET position = CASE
-      WHEN position = :offset + :oldIndex THEN :newIndex
-      ELSE (position - 1) - :offset
+      WHEN position = :oldIndex THEN :newIndex
+      ELSE position - 1
     END
 WHERE
-  position >= (:offset + :oldIndex)
-  AND position <= (:offset + :newIndex);
+  position >= :oldIndex
+  AND position <= :newIndex;
 
 -- moving up (old > new)
-reorderSession_shiftUpAndBack(:offset AS INTEGER, :oldIndex AS INTEGER, :newIndex AS INTEGER):
+reorderSession_shiftUp:
 UPDATE session
   SET position = CASE
-      WHEN position = :offset + :oldIndex THEN :newIndex
-      ELSE (position + 1) - :offset
+      WHEN position = :oldIndex THEN :newIndex
+      ELSE position + 1 
     END
 WHERE
-  position >= (:offset + :newIndex)
-  AND position <= (:offset + :oldIndex);
+  position >= :newIndex
+  AND position <= :oldIndex;
 
 ------
-
-
-
 
 

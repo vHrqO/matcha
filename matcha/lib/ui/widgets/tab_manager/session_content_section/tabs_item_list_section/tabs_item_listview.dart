@@ -25,7 +25,7 @@ class TabsItemListRx extends ConsumerWidget {
     switch (sortedSelectedSessionAsync) {
       case AsyncData(value: final Session session):
       case AsyncLoading(value: final Session session):
-        return TabsItemList(tabsItemList: session.tabsItemList);
+        return TabsItemList(sessionId: session.id, tabsItemList: session.tabsItemList);
 
       case AsyncError(error: final error, stackTrace: final stackTrace):
         // to_do: use notification
@@ -33,14 +33,19 @@ class TabsItemListRx extends ConsumerWidget {
 
       default:
         return Skeletonizer(
-          child: TabsItemList(tabsItemList: mockSession.tabsItemList),
+          child: TabsItemList(
+            sessionId: mockSession.id,
+            tabsItemList: mockSession.tabsItemList,
+          ),
         );
     }
   }
 }
 
 class TabsItemList extends ConsumerStatefulWidget {
-  const TabsItemList({super.key, required this.tabsItemList});
+  const TabsItemList({super.key, required this.sessionId, required this.tabsItemList});
+
+  final int sessionId;
 
   final List<TabsItem> tabsItemList;
 
@@ -92,16 +97,11 @@ class _TabsItemListWidgetState extends ConsumerState<TabsItemList> {
         },
 
         onReorder: (int oldIndex, int newIndex) async {
-          int oldId = -1;
-          int newId = -1;
-
           setState(() {
             // The newIndex provided by Flutter is the index after the target item.
             if (oldIndex < newIndex) {
               newIndex -= 1;
             }
-            oldId = widget.tabsItemList[oldIndex].id;
-            newId = widget.tabsItemList[newIndex].id;
 
             final item = widget.tabsItemList.removeAt(oldIndex);
             widget.tabsItemList.insert(newIndex, item);
@@ -109,7 +109,11 @@ class _TabsItemListWidgetState extends ConsumerState<TabsItemList> {
 
           await ref
               .read(sessionContentOrderProvider.notifier)
-              .reorder(oldIndex, newIndex, oldId, newId);
+              .reorder(
+                oldIndex: oldIndex,
+                newIndex: newIndex,
+                sessionId: widget.sessionId,
+              );
         },
       ),
     );

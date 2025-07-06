@@ -118,16 +118,11 @@ class _TabListState extends ConsumerState<TabList> {
       },
 
       onReorder: (int oldIndex, int newIndex) async {
-        int oldId = -1;
-        int newId = -1;
-
         setState(() {
           // The newIndex provided by Flutter is the index after the target item.
           if (oldIndex < newIndex) {
             newIndex -= 1;
           }
-          oldId = widget.tabList[oldIndex].id;
-          newId = widget.tabList[newIndex].id;
 
           final item = widget.tabList.removeAt(oldIndex);
           widget.tabList.insert(newIndex, item);
@@ -135,7 +130,11 @@ class _TabListState extends ConsumerState<TabList> {
 
         await ref
             .read(sessionContentOrderProvider.notifier)
-            .reorderInGroup(oldIndex, newIndex, oldId, newId);
+            .reorderInGroup(
+              oldIndex: oldIndex,
+              newIndex: newIndex,
+              groupId: widget.tabList[0].groupId!,
+            );
       },
     );
   }

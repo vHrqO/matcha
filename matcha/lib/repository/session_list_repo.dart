@@ -74,14 +74,16 @@ class SessionListRepo extends _$SessionListRepo {
     final tabDb = ref.read(tabDbProvider);
 
     await tabDb.transaction(() async {
-      final safeOffset = await tabDb.reorderSession_getSafeOffset().getSingle();
-
-      await tabDb.reorderSession_addOffset(safeOffset, oldIndex, newIndex);
-
       if (oldIndex < newIndex) {
-        await tabDb.reorderSession_shiftDownAndBack(safeOffset, oldIndex, newIndex);
+        await tabDb.reorderSession_shiftDown(oldIndex, newIndex);
       } else if (oldIndex > newIndex) {
-        await tabDb.reorderSession_shiftUpAndBack(safeOffset, oldIndex, newIndex);
+        await tabDb.reorderSession_shiftUp(oldIndex, newIndex);
+      }
+
+      final isUnique = await tabDb.isSessionPositionUnique().getSingle();
+      if (!isUnique) {
+        print("session.position is not unique, refreshing positions");
+        await tabDb.refreshPositionSession();
       }
     });
 

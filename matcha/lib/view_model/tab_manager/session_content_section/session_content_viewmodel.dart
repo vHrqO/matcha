@@ -1,12 +1,11 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:matcha/model/session/session_meta.dart';
 import 'package:matcha/model/tabs_item/tab.dart' as matcha_tab;
 import 'package:matcha/repository/session_list_repo.dart';
 import 'package:matcha/repository/session_repo.dart';
 import 'package:matcha/repository/tab_group_repo.dart';
 import 'package:matcha/view_model/shared/app_viewmodel.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'package:matcha/mock_data/session.dart';
 import 'package:matcha/view_model/shared/selected_viewmodel.dart';
 import 'package:matcha/model/session/session.dart';
 import 'package:matcha/model/tabs_item/tabs_item.dart';
@@ -125,10 +124,9 @@ class SessionContent extends _$SessionContent {
   Future<void> moveToSession(TabsItem tabsItem, int newSessionId) async {
     await future;
 
-          ref.read(tabGroupOpenedProvider.notifier).toggle(false);
+    ref.read(tabGroupOpenedProvider.notifier).toggle(false);
 
-      ref.read(tabGroupRepoProvider.notifier).clear();
-
+    ref.read(tabGroupRepoProvider.notifier).clear();
 
     await ref
         .read(sessionRepoProvider(_sessionId).notifier)
@@ -164,16 +162,34 @@ class SessionContentOrder extends _$SessionContentOrder {
     //
   }
 
-  Future<void> reorder(int oldIndex, int newIndex, int oldId, int newId) async {
+  Future<void> reorder({
+    required int oldIndex,
+    required int newIndex,
+    required int sessionId,
+  }) async {
+    final link = ref.keepAlive();
+
     await ref
         .read(sessionOrderRepoProvider.notifier)
-        .reorder(oldIndex, newIndex, oldId, newId);
+        .reorder(oldIndex: oldIndex, newIndex: newIndex, sessionId: sessionId);
+
+    ref.invalidate(sessionContentProvider);
+    link.close();
   }
 
-  Future<void> reorderInGroup(int oldIndex, int newIndex, int oldId, int newId) async {
+  Future<void> reorderInGroup({
+    required int oldIndex,
+    required int newIndex,
+    required int groupId,
+  }) async {
+    final link = ref.keepAlive();
+
     await ref
         .read(sessionOrderRepoProvider.notifier)
-        .reorderInGroup(oldIndex, newIndex, oldId, newId);
+        .reorderInGroup(oldIndex: oldIndex, newIndex: newIndex, groupId: groupId);
+
+    ref.invalidate(sessionContentProvider);
+    link.close();
   }
 }
 
