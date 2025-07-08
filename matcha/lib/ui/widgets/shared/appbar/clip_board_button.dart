@@ -20,21 +20,23 @@ class _ClipBoardPopupButtonState extends State<ClipBoardPopupButton>
       controller: controller,
       popoverAnchor: Alignment.topRight,
       childAnchor: Alignment.bottomRight,
-      style: FPopoverStyle(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-      ),
+      style: (style) {
+        return FPopoverStyle(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+        );
+      },
       child: ClipBoardButton(controller: controller),
-      popoverBuilder: (context, style, child) {
+      popoverBuilder: (context, controller) {
         return ClipBoardPopup();
       },
     );
