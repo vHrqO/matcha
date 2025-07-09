@@ -89,6 +89,7 @@ class CommandBar extends StatelessWidget {
 
             // test
             TestWidget(),
+            TestWidget1(),
 
             // right side
             Tooltip(message: 'Select', child: SelectDropdown()),
