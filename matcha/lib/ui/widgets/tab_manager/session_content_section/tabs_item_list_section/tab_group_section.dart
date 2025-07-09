@@ -19,28 +19,26 @@ class TabGroupSectionRx extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTabGroupAsync = ref.watch(selectedTabGroupProvider);
-    final selectedBy = ref.read(selectedTabGroupProvider.notifier).selectedBy();
 
     switch (selectedTabGroupAsync) {
-      case AsyncData(value: final matcha_tab_group.TabGroup selectedTabGroup)
-          when (selectedBy == TabsItemType.app):
-        //
-        return TabGroupCard(
-          tabGroup: selectedTabGroup,
-          hoverMenuBuilder: (tab) {
-            return session_hovermenu.SectionTabHoverMenu(tab: tab);
-          },
-        );
-
-      case AsyncData(value: final matcha_tab_group.TabGroup selectedTabGroup)
-          when (selectedBy == TabsItemType.browser):
-        //
-        return TabGroupCard(
-          tabGroup: selectedTabGroup,
-          hoverMenuBuilder: (tab) {
-            return opened_tabs_hovermenu.SectionTabHoverMenu(tab: tab);
-          },
-        );
+      case AsyncData(value: final matcha_tab_group.TabGroup selectedTabGroup):
+      case AsyncLoading(value: final matcha_tab_group.TabGroup selectedTabGroup):
+        // change hoverMenu builder based on type
+        if (selectedTabGroup.type == TabsItemType.app) {
+          return TabGroupCard(
+            tabGroup: selectedTabGroup,
+            hoverMenuBuilder: (tab) {
+              return session_hovermenu.SectionTabHoverMenu(tab: tab);
+            },
+          );
+        } else {
+          return TabGroupCard(
+            tabGroup: selectedTabGroup,
+            hoverMenuBuilder: (tab) {
+              return opened_tabs_hovermenu.SectionTabHoverMenu(tab: tab);
+            },
+          );
+        }
 
       default:
         return Skeletonizer(

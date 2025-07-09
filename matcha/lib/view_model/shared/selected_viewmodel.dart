@@ -280,12 +280,6 @@ class SelectedTabGroup extends _$SelectedTabGroup {
 
     return (savedTabGroup?.id == tabGroup.id) && (savedTabGroup?.type == tabGroup.type);
   }
-
-  TabsItemType? selectedBy() {
-    final tabGroupRepoState = ref.read(tabGroupRepoProvider);
-
-    return tabGroupRepoState.tabGroup?.type;
-  }
 }
 
 //
