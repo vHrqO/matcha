@@ -1,6 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
@@ -30,6 +29,13 @@ class TabDatabase extends _$TabDatabase {
         databaseDirectory: getApplicationSupportDirectory,
       ),
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+        onResult: (WasmDatabaseResult result) {
+          // print('Wasm database result: $result');
+        },
+      ),
     );
   }
 
