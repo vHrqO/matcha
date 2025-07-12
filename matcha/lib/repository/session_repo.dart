@@ -18,7 +18,7 @@ class SessionRepo extends _$SessionRepo {
     _sessionId = sessionId;
 
     ref.watch(sessionListRepoProvider);
-    final tabDb = ref.watch(tabDbProvider);
+    final tabDb = await ref.watch(tabDbProvider.future);
 
     final List<TabsItem> data = [];
     final sessionName = await tabDb.getSessionName(sessionId: _sessionId).getSingle();
@@ -80,7 +80,7 @@ class SessionRepo extends _$SessionRepo {
   Future<bool> hasTabsItem(TabsItem tabsItem) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final exists = await tabDb.hasTabsItem(tabsItemId: tabsItem.id).getSingle();
 
     link.close();
@@ -90,7 +90,7 @@ class SessionRepo extends _$SessionRepo {
   Future<void> updateTab(matcha_tab.Tab tab) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final savedAllTags = await tabDb.getAllTags(tabsItemId: tab.id).get();
 
     await tabDb.transaction(() async {
@@ -121,7 +121,7 @@ class SessionRepo extends _$SessionRepo {
   Future<void> updateTabGroup(matcha_tab_group.TabGroup tabGroup) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final savedAllTags = await tabDb.getAllTags(tabsItemId: tabGroup.id).get();
 
     await tabDb.transaction(() async {
@@ -165,7 +165,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final inGroup = tab.groupId != null;
 
     await tabDb.transaction(() async {
@@ -204,7 +204,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       // Add TabsItem
@@ -241,7 +241,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final inGroup = tabsItem is matcha_tab.Tab && tabsItem.groupId != null;
 
     await tabDb.transaction(() async {
@@ -263,7 +263,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       await tabDb.moveTabInGroup_removeFromOut(tabsItemId: tab.id);
@@ -282,7 +282,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       await tabDb.moveTabOutGroup_removeFromGroup(tabsItemId: tab.id);
@@ -301,7 +301,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
     final inGroup = (tabsItem is matcha_tab.Tab) && (tabsItem.groupId != null);
     final isGroup = tabsItem is matcha_tab_group.TabGroup;
 
@@ -331,7 +331,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       // Add TabsItem
@@ -366,7 +366,7 @@ class SessionRepo extends _$SessionRepo {
 
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       // Move TabsItem out
@@ -404,7 +404,7 @@ class SessionOrderRepo extends _$SessionOrderRepo {
       throw ArgumentError('oldIndex and newIndex cannot be the same');
     }
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {
@@ -445,7 +445,7 @@ class SessionOrderRepo extends _$SessionOrderRepo {
       throw ArgumentError('oldIndex and newIndex cannot be the same');
     }
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {

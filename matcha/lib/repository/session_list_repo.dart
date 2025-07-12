@@ -16,7 +16,7 @@ class SessionListRepo extends _$SessionListRepo {
   // getAll()
   @override
   Future<List<SessionMeta>> build() async {
-    final tabDb = ref.watch(tabDbProvider);
+    final tabDb = await ref.watch(tabDbProvider.future);
 
     final List<database.SessionData> queryResult = await tabDb.getAllSession().get();
 
@@ -30,7 +30,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> add(String name) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.addSession(name: name);
 
@@ -41,7 +41,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> updateData(SessionMeta sessionMeta) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.updateSession(name: sessionMeta.name, id: sessionMeta.id);
 
@@ -52,7 +52,7 @@ class SessionListRepo extends _$SessionListRepo {
   Future<void> remove(int id) async {
     final link = ref.keepAlive();
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       await tabDb.removeSession(id: id);
@@ -71,7 +71,7 @@ class SessionListRepo extends _$SessionListRepo {
       throw ArgumentError('oldIndex and newIndex cannot be the same');
     }
 
-    final tabDb = ref.read(tabDbProvider);
+    final tabDb = await ref.read(tabDbProvider.future);
 
     await tabDb.transaction(() async {
       if (oldIndex < newIndex) {
