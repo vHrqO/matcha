@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:matcha/ui/widgets/settings/appearance/appearance_section.dart';
+import 'package:matcha/ui/widgets/settings/data/data_section.dart';
 
 class SettingsContent extends StatefulWidget {
   const SettingsContent({super.key});
@@ -50,7 +51,7 @@ class _SettingsContentState extends State<SettingsContent> {
           child: Card(
             child: switch (_selectedIndex) {
               0 => const AppearanceSection(),
-              1 => Text('Data', style: Theme.of(context).textTheme.headlineSmall),
+              1 => const DataSection(),
               2 => Text(
                 'Sync Settings',
                 style: Theme.of(context).textTheme.headlineSmall,
