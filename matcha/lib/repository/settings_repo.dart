@@ -6,6 +6,17 @@ import 'package:matcha/app/constants.dart' as constants;
 class SettingsRepo {
   final _asyncPrefs = SharedPreferencesAsync();
 
+  Future<void> initPrefs() async {
+    await _asyncPrefs.setBool(
+      constants.PrefsKey.firstTimeRun,
+      constants.PrefsValueDefault.firstTimeRun,
+    );
+    await _asyncPrefs.setString(
+      constants.PrefsKey.themeMode,
+      constants.PrefsValueDefault.themeMode,
+    );
+  }
+
   Future<bool> isFirstTimeRun() async {
     final firstTimeRun = await _asyncPrefs.getBool(constants.PrefsKey.firstTimeRun);
 
@@ -36,14 +47,5 @@ class SettingsRepo {
     await _asyncPrefs.setString(constants.PrefsKey.themeMode, themeMode.name);
   }
 
-  Future<void> initSettings() async {
-    await _asyncPrefs.setBool(
-      constants.PrefsKey.firstTimeRun,
-      constants.PrefsValueDefault.firstTimeRun,
-    );
-    await _asyncPrefs.setString(
-      constants.PrefsKey.themeMode,
-      constants.PrefsValueDefault.themeMode,
-    );
-  }
+  
 }
