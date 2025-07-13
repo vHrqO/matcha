@@ -26,11 +26,17 @@ class AnimationSettings {
   static const curve = Curves.easeInOutCubic;
 }
 
+class DatabaseName {
+  static const String tabDatabase = "tab_database";
+}
+
 /// Preferences key
 class PrefsKey {
   static const String firstTimeRun = "first_time_run";
 
   static const String themeMode = "theme_mode";
+
+  static const String tabDbBackups = "tab_db_backups";
 }
 
 /// Preferences default value
@@ -38,4 +44,6 @@ class PrefsValueDefault {
   static const bool firstTimeRun = false;
 
   static const String themeMode = "dark";
+
+  static const List<String> tabDbBackups = [];
 }
