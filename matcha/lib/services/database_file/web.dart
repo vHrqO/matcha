@@ -29,16 +29,10 @@ class DatabaseFileService implements none.DatabaseFileService {
 
     // export
     if (isIndexedDb) {
-      // https://github.com/simolus3/drift/issues/3511#issuecomment-2755611490
-      final fs = await sqlite3_wasm.IndexedDbFileSystem.open(dbName: databaseName);
-      const path = '/database'; // Drift will always use this path.
-      final (file: file, outFlags: _) = fs.xOpen(sqlite3_wasm.Sqlite3Filename(path), 0);
-
-      final blob = Uint8List(file.xFileSize());
-      file.xRead(blob, 0);
-
-      file.xClose();
-      await fs.close();
+      final blob = await info.exportDatabase((
+        drift_wasm.WebStorageApi.indexedDb,
+        databaseName,
+      ));
 
       return blob;
     }
