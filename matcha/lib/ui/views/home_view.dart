@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matcha/repository/settings_repo.dart';
 import 'package:matcha/ui/views/appbar.dart';
 import 'package:matcha/ui/views/app_content.dart';
+import 'package:matcha/utils/prefs_helpers.dart' as prefs_helpers;
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -65,8 +66,8 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         ),
       );
 
-      // first time run, init settings
-      await settingsRepo.initSettings();
+      // first time run, init preferences
+      await prefs_helpers.initAllPrefs();
 
       // dummy code for the wait period
       // await Future.delayed(Duration(milliseconds: 5500));
