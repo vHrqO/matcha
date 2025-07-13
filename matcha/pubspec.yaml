@@ -53,6 +53,11 @@ dependencies:
   drift_flutter: ^0.2.4
   path_provider: ^2.1.5
   shared_preferences: ^2.5.3
+  idb_shim: ^2.6.7
+  file_picker: ^10.2.0
+  cross_file: ^0.3.4+2
+  path: ^1.9.1
+  sqlite3: ^2.7.6
   
 
 
