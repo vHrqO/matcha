@@ -1,9 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart' as drift_wasm;
-import 'package:sqlite3/wasm.dart' as sqlite3_wasm;
-import 'package:matcha/services/database_backup/web.dart' show altDeleteDatabase;
 
 import 'package:matcha/view_model/shared/database_viewmodel.dart';
 import 'package:matcha/services/database_file/none.dart' as none;
@@ -60,8 +59,6 @@ class DatabaseFileService implements none.DatabaseFileService {
 
     // Close the current database connection
     await ref.read(tabDbProvider.notifier).close();
-    // final tabDb = await ref.read(tabDbProvider.future);
-    // await tabDb.close();
 
     // Delete Database
     //  to_do : bug?
@@ -69,7 +66,7 @@ class DatabaseFileService implements none.DatabaseFileService {
 
     // import
     if (isIndexedDb) {
-      final tmp = await info.open(
+      final DatabaseConnection tmpConnection = await info.open(
         drift_wasm.WasmStorageImplementation.sharedIndexedDb,
         databaseName,
         initializeDatabase: () async {
@@ -77,7 +74,20 @@ class DatabaseFileService implements none.DatabaseFileService {
         },
       );
 
-      // await tmp.close();
+      // failed
+      // RethrownDartError: LateInitializationError: Field '' has not been initialized.
+      // await tmpConnection.runCustom('SELECT 1;');
+
+      // work
+      // random test query
+      final tabDb = TabDbSingleton().db;
+      await tabDb.getAllDistinctTags().get();
+      await TabDbSingleton.release();
+
+      //
+      await tmpConnection.close();
+    } else {
+      throw Exception('Unsupported database API for import');
     }
 
     // restore connection
