@@ -6,36 +6,55 @@ import 'package:matcha/database/database.dart' as database;
 
 part 'database_viewmodel.g.dart';
 
+class TabDbSingleton {
+  // singleton cache
+  static TabDbSingleton? _instance;
+
+  // database connection
+  late final database.TabDatabase db;
+
+  // lazy init
+  factory TabDbSingleton() => _instance ??= TabDbSingleton._internal();
+
+  TabDbSingleton._internal() {
+    db = database.TabDatabase();
+  }
+
+  static Future<void> release() async {
+    print("TabDbSingleton.release()");
+    // if the instance exists, close database
+    await _instance?.db.close();
+
+    // drop the cache
+    _instance = null;
+  }
+}
+
 @riverpod
 class TabDb extends _$TabDb {
-  late database.TabDatabase _database;
-
   bool _canConnect = true;
   Completer<void> _waitConnect = Completer<void>();
 
   @override
   Future<database.TabDatabase> build() async {
-    // Wait until can connect , default is true
+    // block until can connect , default is true
     if (!_waitConnect.isCompleted && _canConnect) {
       _waitConnect.complete();
     }
     await _waitConnect.future;
 
     // init database
-    _database = database.TabDatabase();
+    final db = TabDbSingleton().db;
 
-    // When the state is destroyed, close the database
-    ref.onDispose(() async {
-      await _database.close();
-    });
-
-    return _database;
+    return db;
   }
 
   Future<void> close() async {
-    await _database.close();
+    await TabDbSingleton.release();
 
     _canConnect = false;
+
+    // block build() next time
     if (_waitConnect.isCompleted) {
       _waitConnect = Completer<void>();
     }
@@ -45,6 +64,8 @@ class TabDb extends _$TabDb {
 
   Future<void> connect() async {
     _canConnect = true;
+
+    // unblock waiting
     if (!_waitConnect.isCompleted) {
       _waitConnect.complete();
     }
