@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:matcha/app/constants.dart' as constants;
+
 part 'database.g.dart';
 
 @DriftDatabase(
@@ -22,7 +24,7 @@ class TabDatabase extends _$TabDatabase {
 
   static QueryExecutor _openConnection() {
     return driftDatabase(
-      name: 'tab_database',
+      name: constants.DatabaseName.tabDatabase,
       native: const DriftNativeOptions(
         // By default, `driftDatabase` from `package:drift_flutter` stores the
         // database files in `getApplicationDocumentsDirectory()`.
