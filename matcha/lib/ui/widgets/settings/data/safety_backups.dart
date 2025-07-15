@@ -1,11 +1,10 @@
-import 'dart:convert';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart';
-import 'package:matcha/model/backup_info.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+
 import 'package:matcha/ui/widgets/shared/loading_dialog.dart';
 import 'package:matcha/view_model/settings/data_viewmodel.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class SafetyBackupsAction extends ConsumerWidget {
   const SafetyBackupsAction({super.key});
@@ -65,6 +64,15 @@ class SafetyBackupsListRx extends ConsumerWidget {
                 (backup) => SafetyBackupTile(
                   title: backup.saveTime.toLocal().toString(),
                   subtitle: backup.backupType,
+                  onSave: () async {
+                    showLoadingDialog(context, 'Saving backup...');
+
+                    await ref
+                        .read(safetyBackupsListProvider.notifier)
+                        .saveBackup(backup);
+
+                    Navigator.of(context).pop(); // Close the loading dialog
+                  },
                   onRestore: () async {
                     showLoadingDialog(context, 'Restoring backup...');
 
@@ -101,12 +109,15 @@ class SafetyBackupTile extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
+    this.onSave,
     this.onRestore,
     this.onDelete,
   });
 
   final String title;
   final String subtitle;
+
+  final VoidCallback? onSave;
   final VoidCallback? onRestore;
   final VoidCallback? onDelete;
 
@@ -117,7 +128,13 @@ class SafetyBackupTile extends StatelessWidget {
       subtitle: Text(subtitle),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
+        spacing: 8,
         children: [
+          OutlinedButton.icon(
+            icon: Icon(Icons.save),
+            label: Text('Save'),
+            onPressed: onSave,
+          ),
           OutlinedButton.icon(
             icon: Icon(Icons.restore),
             label: Text('Restore'),
