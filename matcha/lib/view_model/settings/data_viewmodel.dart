@@ -1,13 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:matcha/model/backup_info.dart';
 import 'package:matcha/repository/database_repo.dart';
 import 'package:matcha/services/database_backup/database_backup_service.dart';
 import 'package:matcha/services/database_file/database_file_service.dart';
 import 'package:matcha/services/file_service.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import 'package:matcha/repository/settings_repo.dart';
-
 import 'package:matcha/app/constants.dart' as constants;
 
 part 'data_viewmodel.g.dart';
@@ -40,7 +37,7 @@ class ImportExportDb extends _$ImportExportDb {
       throw Exception('Failed to export database');
     }
 
-    await FileService().saveFile("tabDatabase.db", file);
+    await FileService().saveFile("${constants.DatabaseName.tabDatabase}.db", file);
   }
 }
 
@@ -119,5 +116,17 @@ class SafetyBackupsList extends _$SafetyBackupsList {
     await DatabaseBackupService().deleteAllBackups();
 
     ref.invalidateSelf();
+  }
+
+  Future<void> saveBackup(BackupInfo backupInfo) async {
+    // export database
+    final file = await DatabaseFileService().exportDatabase(
+      constants.DatabaseName.tabDatabase,
+    );
+    if (file == null) {
+      throw Exception('Failed to export database');
+    }
+
+    await FileService().saveFile("${constants.DatabaseName.tabDatabase}.db", file);
   }
 }
