@@ -297,14 +297,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.2"
-  drag_and_drop_lists:
-    dependency: "direct main"
-    description:
-      name: drag_and_drop_lists
-      sha256: "285e602face3a1cfe1367e1bcca84228b215914d52ef4fd5310a53fe695144ed"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.2"
   drift:
     dependency: "direct main"
     description:
@@ -385,14 +377,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  fluent_ui:
-    dependency: "direct main"
-    description:
-      name: fluent_ui
-      sha256: "8645eabacb46bfc9632fadc6e106756cdc6f2a4efb5a4fed4410bd3131306fe8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.12.0"
   fluentui_system_icons:
     dependency: "direct main"
     description:
@@ -566,7 +550,7 @@ packages:
     source: hosted
     version: "4.1.2"
   idb_shim:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: idb_shim
       sha256: ee391deb010143823d25db15f8b002945e19dcb5f2dd5b696a98cb6db7644012
@@ -693,14 +677,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.1"
-  math_expressions:
-    dependency: transitive
-    description:
-      name: math_expressions
-      sha256: "218dc65bed4726562bb31c53d8daa3cc824664b26fb72d77bc592757edf74ba0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   meta:
     dependency: transitive
     description:
@@ -933,22 +909,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
-  scroll_pos:
-    dependency: transitive
-    description:
-      name: scroll_pos
-      sha256: cebf602b2dd939de6832bb902ffefb574608d1b84f420b82b381a4007d3c1e1b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.0"
   sembast:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sembast
       sha256: "7119cf6f79bd1d48c8ec7943f4facd96c15ab26823021ed0792a487c7cd34441"
       url: "https://pub.dev"
     source: hosted
     version: "3.8.5+1"
+  sembast_web:
+    dependency: "direct main"
+    description:
+      name: sembast_web
+      sha256: "0362c7c241ad6546d3e27b4cfffaae505e5a9661e238dbcdd176756cc960fe7a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.2"
   shadcn_flutter:
     dependency: "direct main"
     description:
