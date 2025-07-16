@@ -1,106 +1,96 @@
 import 'dart:typed_data';
 
-import 'package:idb_shim/idb.dart' as idb_shim;
-import 'package:idb_shim/idb_browser.dart' as idb_shim_browser;
+import 'package:sembast/sembast.dart' as sembast;
+import 'package:sembast_web/sembast_web.dart' as sembast_web;
 
 import 'package:matcha/services/database_backup/none.dart' as none;
+import 'package:matcha/app/constants.dart' as constants;
 
-class DatabaseBackupService implements none.DatabaseBackupService {
-  Future<({idb_shim.Database db, String storeName})> _openDbBackup() async {
-    final idbFactory = idb_shim_browser.getIdbFactory();
-    if (idbFactory == null) {
-      throw Exception('IndexedDB is not supported');
+class DbBackupSingleton {
+  // singleton cache
+  static DbBackupSingleton? _instance;
+
+  // database connection
+  late final sembast.Database db;
+
+  // lazy init
+  DbBackupSingleton._internal();
+
+  static Future<DbBackupSingleton> get instance async {
+    if (_instance == null) {
+      _instance = DbBackupSingleton._internal();
+
+      _instance!.db = await sembast_web.databaseFactoryWeb.openDatabase(
+        constants.DatabaseName.databaseBackup,
+      );
     }
 
-    const String storeName = "tab_db_backup";
+    return _instance!;
+  }
 
-    // open the database
-    final db = await idbFactory.open(
-      "backup",
-      version: 1,
-      onUpgradeNeeded: (idb_shim.VersionChangeEvent event) {
-        final db = event.database;
-        // create the store
-        db.createObjectStore(storeName, autoIncrement: true);
-      },
-    );
+  static Future<void> release() async {
+    // if the instance exists, close database
+    await _instance?.db.close();
 
-    return (db: db, storeName: storeName);
+    // drop the cache
+    _instance = null;
+  }
+}
+
+class DatabaseBackupService implements none.DatabaseBackupService {
+  @override
+  Future<void> saveToBackup(
+    constants.DatabaseType type,
+    String name,
+    Uint8List bytes,
+  ) async {
+    final db = (await DbBackupSingleton.instance).db;
+    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
+
+    // Store data
+    await db.transaction((txn) async {
+      await store.record(name).put(db, bytes);
+    });
+
+    await DbBackupSingleton.release();
   }
 
   @override
-  Future<void> saveToBackup(String name, Uint8List bytes) async {
-    final (db: db, storeName: storeName) = await _openDbBackup();
+  Future<Uint8List?> exportBackup(constants.DatabaseType type, String name) async {
+    final db = (await DbBackupSingleton.instance).db;
+    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
 
-    // put data
-    final transaction = db.transaction(storeName, "readwrite");
-    final store = transaction.objectStore(storeName);
-    await store.put(bytes, name);
-    await transaction.completed;
+    // read data
+    final bytes = await store.record(name).get(db);
 
-    db.close();
-  }
-
-  @override
-  Future<Uint8List?> exportBackup(String name) async {
-    final (db: db, storeName: storeName) = await _openDbBackup();
-
-    // read some data
-    final transaction = db.transaction(storeName, "readonly");
-    final store = transaction.objectStore(storeName);
-    final bytes = await store.getObject(name);
-    await transaction.completed;
-
-    db.close();
+    await DbBackupSingleton.release();
 
     if (bytes != null) {
-      return bytes as Uint8List;
+      return bytes;
     }
 
     return null;
   }
 
   @override
-  Future<void> deleteBackup(String name) async {
-    final (db: db, storeName: storeName) = await _openDbBackup();
+  Future<void> deleteBackup(constants.DatabaseType type, String name) async {
+    final db = (await DbBackupSingleton.instance).db;
+    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
 
     // delete data
-    final transaction = db.transaction(storeName, "readwrite");
-    final store = transaction.objectStore(storeName);
-    await store.delete(name);
-    await transaction.completed;
+    await store.record(name).delete(db);
 
-    db.close();
+    await DbBackupSingleton.release();
   }
 
   @override
-  Future<void> deleteAllBackups() async {
-    final (db: db, storeName: storeName) = await _openDbBackup();
+  Future<void> deleteAllBackups(constants.DatabaseType type) async {
+    final db = (await DbBackupSingleton.instance).db;
+    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
 
     // delete all data
-    final transaction = db.transaction(storeName, "readwrite");
-    final store = transaction.objectStore(storeName);
-    await store.clear();
-    await transaction.completed;
+    await store.delete(db);
 
-    db.close();
+    await DbBackupSingleton.release();
   }
-}
-
-//
-Future<void> altDeleteDatabase(String name) async {
-  final idbFactory = idb_shim_browser.getIdbFactory();
-  if (idbFactory == null) {
-    throw Exception('IndexedDB is not supported');
-  }
-
-
-
-  // delete the database
-  await idbFactory.deleteDatabase(
-    name,
-    onBlocked: (event) {
-      print('Database deletion blocked: $event');
-    },
-  );
 }
