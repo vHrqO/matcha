@@ -60,7 +60,11 @@ class SafetyBackupsList extends _$SafetyBackupsList {
       throw Exception('Failed to export database');
     }
 
-    await DatabaseBackupService().saveToBackup(backupName, file);
+    await DatabaseBackupService().saveToBackup(
+      constants.DatabaseType.tab,
+      backupName,
+      file,
+    );
 
     // add history
     await TabDbBackupsHistoryRepo().addTabDbHistory(
@@ -75,7 +79,10 @@ class SafetyBackupsList extends _$SafetyBackupsList {
     final backups = await TabDbBackupsHistoryRepo().getTabDbHistory();
     if (backups.length > 3) {
       await TabDbBackupsHistoryRepo().deleteTabDbHistory(backups.first.name);
-      await DatabaseBackupService().deleteBackup(backups.first.name);
+      await DatabaseBackupService().deleteBackup(
+        constants.DatabaseType.tab,
+        backups.first.name,
+      );
     }
 
     ref.invalidateSelf();
@@ -83,7 +90,10 @@ class SafetyBackupsList extends _$SafetyBackupsList {
 
   Future<void> restoreBackup(BackupInfo backupInfo) async {
     // get backup
-    final file = await DatabaseBackupService().exportBackup(backupInfo.name);
+    final file = await DatabaseBackupService().exportBackup(
+      constants.DatabaseType.tab,
+      backupInfo.name,
+    );
     if (file == null) {
       throw Exception('Failed to get backup');
     }
@@ -103,7 +113,10 @@ class SafetyBackupsList extends _$SafetyBackupsList {
     await TabDbBackupsHistoryRepo().deleteTabDbHistory(backupInfo.name);
 
     // delete backups
-    await DatabaseBackupService().deleteBackup(backupInfo.name);
+    await DatabaseBackupService().deleteBackup(
+      constants.DatabaseType.tab,
+      backupInfo.name,
+    );
 
     ref.invalidateSelf();
   }
@@ -113,7 +126,7 @@ class SafetyBackupsList extends _$SafetyBackupsList {
     await TabDbBackupsHistoryRepo().deleteAllTabDbHistory();
 
     // delete all backups
-    await DatabaseBackupService().deleteAllBackups();
+    await DatabaseBackupService().deleteAllBackups(constants.DatabaseType.tab);
 
     ref.invalidateSelf();
   }
