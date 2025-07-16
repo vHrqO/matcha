@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:sembast/sembast.dart' as sembast;
+import 'package:sembast/blob.dart' as sembast_blob;
 import 'package:sembast_web/sembast_web.dart' as sembast_web;
 
 import 'package:matcha/services/database_backup/none.dart' as none;
@@ -38,14 +39,22 @@ class DbBackupSingleton {
 }
 
 class DatabaseBackupService implements none.DatabaseBackupService {
+  //
+  Future<(sembast.Database, sembast.StoreRef<String, sembast_blob.Blob>)>
+  _getDbAndStore(constants.DatabaseType type) async {
+    final db = (await DbBackupSingleton.instance).db;
+    final store = sembast.StoreRef<String, sembast_blob.Blob>(type.dbName);
+
+    return (db, store);
+  }
+
   @override
   Future<void> saveToBackup(
     constants.DatabaseType type,
     String name,
     Uint8List bytes,
   ) async {
-    final db = (await DbBackupSingleton.instance).db;
-    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
+    final (db, store) = await _getDbAndStore(type);
 
     // Store data
     await db.transaction((txn) async {
@@ -57,11 +66,10 @@ class DatabaseBackupService implements none.DatabaseBackupService {
 
   @override
   Future<Uint8List?> exportBackup(constants.DatabaseType type, String name) async {
-    final db = (await DbBackupSingleton.instance).db;
-    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
+    final (db, store) = await _getDbAndStore(type);
 
     // read data
-    final bytes = await store.record(name).get(db);
+    final bytes = (await store.record(name).get(db))?.bytes;
 
     await DbBackupSingleton.release();
 
@@ -74,8 +82,7 @@ class DatabaseBackupService implements none.DatabaseBackupService {
 
   @override
   Future<void> deleteBackup(constants.DatabaseType type, String name) async {
-    final db = (await DbBackupSingleton.instance).db;
-    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
+    final (db, store) = await _getDbAndStore(type);
 
     // delete data
     await store.record(name).delete(db);
@@ -85,8 +92,7 @@ class DatabaseBackupService implements none.DatabaseBackupService {
 
   @override
   Future<void> deleteAllBackups(constants.DatabaseType type) async {
-    final db = (await DbBackupSingleton.instance).db;
-    final store = sembast.StoreRef<String, Uint8List>(type.dbName);
+    final (db, store) = await _getDbAndStore(type);
 
     // delete all data
     await store.delete(db);
