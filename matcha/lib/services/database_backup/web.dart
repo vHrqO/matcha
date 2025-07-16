@@ -57,9 +57,7 @@ class DatabaseBackupService implements none.DatabaseBackupService {
     final (db, store) = await _getDbAndStore(type);
 
     // Store data
-    await db.transaction((txn) async {
-      await store.record(name).put(db, bytes);
-    });
+    await store.record(name).put(db, sembast_blob.Blob(bytes));
 
     await DbBackupSingleton.release();
   }
