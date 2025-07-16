@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-//
+/// enum
 enum SortOrder {
   custom("Custom"),
   ascending("Ascending"),
@@ -21,13 +21,25 @@ enum SelectMethod {
   const SelectMethod(this.uiName);
 }
 
+enum DatabaseType {
+  tab(DatabaseName.tabDatabase),
+  bookmark(DatabaseName.bookmarkDatabase);
+
+  final String dbName;
+  const DatabaseType(this.dbName);
+}
+
+///
+
 class AnimationSettings {
   static const duration = Duration(milliseconds: 300);
   static const curve = Curves.easeInOutCubic;
 }
 
 class DatabaseName {
+  static const String databaseBackup = "database_backup";
   static const String tabDatabase = "tab_database";
+  static const String bookmarkDatabase = "bookmark_database";
 }
 
 /// Preferences key
