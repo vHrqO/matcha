@@ -21,7 +21,6 @@ class TabDbSingleton {
   }
 
   static Future<void> release() async {
-    print("TabDbSingleton.release()");
     // if the instance exists, close database
     await _instance?.db.close();
 
