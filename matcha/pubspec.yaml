@@ -37,8 +37,8 @@ dependencies:
 
   chrome_extension: ^0.4.0
 
-  flutter_riverpod: ^3.0.0-dev.16
-  riverpod_annotation: ^3.0.0-dev.16
+  flutter_riverpod: ^3.0.0-dev.17
+  riverpod_annotation: ^3.0.0-dev.17
   freezed_annotation: ^3.0.0
   json_annotation: ^4.9.0
 
